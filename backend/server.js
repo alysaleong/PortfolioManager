@@ -1,9 +1,10 @@
 import express from "express";
 import pg from "pg";
-const { Pool } = pg;
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import profolioRouter from "./routes/portfolio.js";
 
+const { Pool } = pg;
 const app = express()
 const PORT = 4000;
 
@@ -31,6 +32,8 @@ app.use((req, res, next) => {
     console.log(`HTTP req: ${req.method} ${req.path} ${req.body ? JSON.stringify(req.body) : ''}`);
     next();
 })
+
+app.use("/portfolio", profolioRouter);
 
 // Open Port
 app.listen(PORT, () => {
