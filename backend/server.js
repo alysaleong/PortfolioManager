@@ -1,15 +1,14 @@
 import express from "express";
 import pg from "pg";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
+import session from "express-session";
 import router from "./routes/index.js";
 
 const { Pool } = pg;
 const app = express()
 const PORT = 4000;
 
+// connect to postgresql
 let pool;
-
 async function connectToPG() {
     try {
         pool = new Pool({
@@ -20,13 +19,23 @@ async function connectToPG() {
             port: process.env.PG_PORT,
         });
     } catch (error) {
-        console.error("error connecting to psotgresql :(", error);
+        console.error("error connecting to postgresql :(", error);
     }
 }
-
 connectToPG();
 export { pool };
 
+// set up sessions
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false, // don't save session if unmodified
+  saveUninitialized: false, // don't create session until something stored
+  cookie: {
+      httpOnly: true // don't let frontend code access session cookie
+  }
+}));
+
+// middleware to parse json
 app.use(express.json());
 
 // to display requests in console
@@ -40,7 +49,7 @@ app.use((req, res, next) => {
 // routes
 app.use("/api", router, (err, req, res, next) => {
     console.error(err.stack);
-    res.status(500).send('Something broke!');
+    res.status(500).send(err.message);
   }
 );
 
