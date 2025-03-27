@@ -41,7 +41,7 @@ router.get('/requests/incoming', async (req, res) => {
     // get all the requesters for which I am the requestee
     const requesters = await pool.query(
         `SELECT requester, email
-        FROM request JOIN users ON request.requester = users.uid
+        FROM requested JOIN users ON requested.requester = users.uid
         WHERE requestee = $1`,
         uid
     );
@@ -104,12 +104,63 @@ router.post('/requests/reject', async (req, res) => {
 // OUTGOING REQUEST 
 // get my outgoing requests 
 router.get('/requests/outgoing', async (req, res) => {
+    const uid = req.session.uid; 
+    let outgoing = [];
 
+    // get all requestee for which I am the requester
+    const requestees = pool.query(
+        `SELECT requestee, email 
+        FROM requested JOIN users ON requested.requestee = users.uid
+        WHERE requester = $1`,
+        [uid]
+    );
+
+    outgoing = requestees.rows;
+
+    res.status(200).json(outgoing);
 })
 
 // send a request
 router.post('/requests', async (req, res) => {
+    const uid = req.session.uid;
+    const requestee = req.body.requestee;
 
+    // make sure they aren't already friends
+    const are_friends = pool.query(
+        `SELECT * FROM friends 
+        WHERE (u1 = $1 AND u2 = $2) OR (u1 = $2 AND u2 = $1)`,
+        [uid, requestee]
+    );
+    if (are_friends.rows.length > 0) {
+        res.status(400).json({error: "You are already friends" });
+    }
+
+    // make sure there isn't already a request between these two
+    const you_requested = pool.query(
+        `SELECT * FROM requested 
+        WHERE (requester = $1 AND requestee = $2)`,
+        [uid, requestee]
+    );
+    if (you_requested.rows.length > 0) {
+        res.status(400).json({error: "You already sent a request" });
+    }
+
+    const they_requested = pool.query(
+        `SELECT * FROM requested 
+        WHERE (requester = $1 AND requestee = $2)`,
+        [requestee, uid]
+    );
+    if (they_requested.rows.length > 0) {
+        res.status(400).json({error: "They already sent you a request" });
+    }
+
+    // create the request
+    await pool.query(
+        `INSERT INTO requested (requester, requestee) VALUES ($1, $2)`,
+        [uid, requestee]
+    );
+
+    res.status(200).json({ message: "Friend request sent" });
 }); 
 
 
