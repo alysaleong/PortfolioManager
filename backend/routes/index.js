@@ -25,6 +25,7 @@ router.get('/me', async (req, res) => {
 router.post('/register', async (req, res) => {
     // get the email and password from request
     const { email, password } = req.body;
+    const cash = req.body.cash || null;
 
     // check if email is taken
     const emailTaken = await pool.query(
@@ -46,6 +47,12 @@ router.post('/register', async (req, res) => {
             [email, hashed_password]
         );
         const user = result.rows[0];
+
+        // registering also creates a portfolio since you need at least 1
+        pool.query(
+            'INSERT INTO portfolios (uid, cash) VALUES ($1, $2)',
+            [user.uid, cash]
+        );
         
         // create a session so the user is logged in
         req.session.uid = user.uid;
