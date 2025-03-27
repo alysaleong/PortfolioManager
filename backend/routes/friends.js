@@ -56,14 +56,16 @@ router.post('/requests/accept', async (req, res) => {
     const requester = req.body.requestor;
     const uid = req.session.uid;
 
-    // if it the friend request exist, create a friendship and delete the request
+    // if the friend request exist, create a friendship and delete the request
     const result = await pool.query(
-        `DELETE FROM request WHERE requester = $1 AND requestee = $2 RETURNING *`,
+        `DELETE FROM requested WHERE requester = $1 AND requestee = $2 RETURNING *`,
         [requester, uid]
     );
-    // there was no such request
+    
+    // if the friend request was not found
     if (result.rows.length === 0) {
-        return res.status(400).json({ error: "No such friend request" });
+        res.status(400).json({ error: "No such friend request" });
+        return;
     }
 
     // create a friendship
@@ -78,9 +80,25 @@ router.post('/requests/accept', async (req, res) => {
 
 // reject request
 router.post('/requests/reject', async (req, res) => {
+    const requester = req.body.requestor;
+    const uid = req.session.uid;
 
+    // if the friend request exists, set the rejected_at timestamp to now
+    const result = await pool.query(
+        `UPDATE requested SET rejected_at = NOW()
+        WHERE requester = $1 AND requestee = $2 RETURNING *`,
+        [requester, uid]
+    );
+
+    // if the friend request was not found
+    if (result.rows.length === 0) {
+        res.status(400).json({ error: "No such friend request" });
+        return;
+    }
+    
+    // send the response
+    res.status(200).json({ message: "Friend request rejected" });
 });
-
 
 
 // OUTGOING REQUEST 
