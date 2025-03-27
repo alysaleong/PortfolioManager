@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import { pool } from '../server.js'
 import portfoliosRouter from './portfolio.js';
 import friendsRouter from './friends.js';
-import isAuth from '../middleware/authMiddleware.js'
+import { isAuth } from '../middleware/authMiddleware.js'
 
 const router = express.Router();
 const SALT_ROUNDS = 5;
@@ -59,9 +59,8 @@ router.post('/register', async (req, res) => {
         req.session.uid = user.uid;
         req.session.email = user.email;
 
-        // send user info as response
-        delete user.password;
-        res.status(201).json(user);
+        // send response
+        res.status(201).json({ message: "User registered" });
 
     } catch (error) {
         res.status(500).json({ error: "Error registering user, " + error});
@@ -103,9 +102,8 @@ router.post('/login', async (req, res) => {
         req.session.uid = user.uid;
         req.session.email = user.email;
 
-        // send user info as respoinse
-        delete user.password;
-        res.status(200).json(user);
+        // send respoinse
+        res.status(200).json({ message: "Logged in" });
     })
 });
 
