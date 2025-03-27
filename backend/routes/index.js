@@ -1,8 +1,9 @@
 import express from 'express';
-import session from 'express-session';
 import bcrypt from 'bcrypt';
 import { pool } from '../server.js'
-import portfolioRouter from './portfolio.js';
+import portfoliosRouter from './portfolio.js';
+import friendsRouter from './friends.js';
+import isAuth from '../middleware/authMiddleware.js'
 
 const router = express.Router();
 const SALT_ROUNDS = 5;
@@ -122,6 +123,7 @@ router.get('/logout', async (req, res) => {
 
 
 // ROUTES
-router.use('/portfolio', portfolioRouter);
+router.use('/portfolios', isAuth, portfoliosRouter);
+router.use('/friends', isAuth, friendsRouter);
 
 export default router;
