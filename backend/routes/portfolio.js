@@ -34,18 +34,15 @@ router.get('/:pid', async (req, res) => {
     const pid = req.params.pid;
     
     // check if the given portfolio belongs to user
-    const u_ports = await pool.query(
+    let u_ports = await pool.query(
         `SELECT pid
         FROM portfolios
         WHERE uid = $1`,
         [uid]
     );
-    let uports = [];
-    for (const uport of u_ports.rows) {
-        uports.push(uport.pid);
-    };
-    if (!(uports.includes(Number(pid)))) {
-        res.status(400).json({error: "Not your portfolio"});
+    u_ports = u_ports.rows.map(row => row.pid);
+    if (!(u_ports.includes(Number(pid)))) {
+        res.status(400).json({error: "Invalid portfolio"});
         return;
     };
     
@@ -66,75 +63,58 @@ router.post('/buy', async (req, res) => {
     const quantity = req.body.quantity;
     
     // check if the given portfolio belongs to user
-    const u_ports = await pool.query(
+    let u_ports = await pool.query(
         `SELECT pid
         FROM portfolios
         WHERE uid = $1`,
         [uid]
     );
-    let uports = [];
-    for (const uport of u_ports.rows) {
-        uports.push(uport.pid);
-    };
-    if (!(uports.includes(Number(pid)))) {
-        res.status(400).json({error: "Not your portfolio"});
+    u_ports = u_ports.rows.map(row => row.pid);
+    if (!(u_ports.includes(pid))) {
+        res.status(400).json({error: "Invalid portfolio"});
         return;
     };
 
     // check if the given stock is in the database
-    const symbols = await pool.query(
+    let symbols = await pool.query(
         `SELECT symbol
         FROM stocks`
     );
-    let symbols_extracted = [];
-    for (const sym of symbols.rows) {
-        symbols_extracted.push(sym.symbol);
-    };
-    if (!(symbols_extracted.includes(symbol))) {
+    symbols = symbols.rows.map(row => row.symbol);
+    if (!(symbols.includes(symbol))) {
         res.status(400).json({error: "Invalid symbol"});
         return;
     };
 
     // check if user has enough cash to purchase the stock at the given quantity
-    const cash = await pool.query(
+    let cash = await pool.query(
         `SELECT cash
         FROM portfolios
         WHERE pid = $1`,
         [pid]
     );
-    const stock_price = await pool.query(
+    let stock_price = await pool.query(
         `SELECT curr_val
         FROM stocks
         WHERE symbol = $1`,
         [symbol]
     );
-    let cash_extracted = [];
-    for (const c of cash.rows) {
-        cash_extracted.push(c.cash);
-    };
-    let price_extracted = [];
-    for (const p of stock_price.rows) {
-        price_extracted.push(p.curr_val);
-    };
-    cash_extracted = cash_extracted[0];
-    price_extracted = price_extracted[0];
-    const total_price = price_extracted * quantity;
-    if (total_price > cash_extracted) {
+    cash = cash.rows.map(row => row.cash);
+    stock_price = stock_price.rows.map(row => row.curr_val);
+    const total_price = stock_price * quantity;
+    if (total_price > cash) {
         res.status(400).json({error: "Not enough cash in portfolio"});
         return;
     };
    
-    const p_stocks = await pool.query(
+    let p_stocks = await pool.query(
         `SELECT symbol
         FROM in_port
         WHERE pid = $1`,
         [pid]
     );
-    let pstocks = [];
-    for (const sym of p_stocks.rows) {
-        pstocks.push(sym.symbol);
-    };
-    if (pstocks.includes(symbol)) {
+    p_stocks = p_stocks.rows.map(row => row.symbol);
+    if (p_stocks.includes(symbol)) {
          // buy more of stock (if user already owns that stock)
         await pool.query(
             `UPDATE in_port
