@@ -1,4 +1,4 @@
-## Get friend 
+## Get all friends
 ### req: GET http://localhost:4000/api/friends
 ### res:
 ```
@@ -18,7 +18,7 @@
 ]
 ```
 
-## GET incoming friend requests
+## Get incoming friend requests
 ### req: GET http://localhost:4000/api/friends/requests/incoming
 ### res: 
 ```
@@ -38,7 +38,7 @@
 ]
 ```
 
-## GET outgoing friend requests: 
+## Get outgoing friend requests: 
 ### req: http://localhost:4000/api/friends/requests/outgoing
 ### res: 
 ```
@@ -90,3 +90,11 @@
 ```
 ### res: success message
 
+## Remove a friend  
+### req: POST http://localhost:4000/api/friends
+```
+{
+    "friend": 1
+}
+```
+### res: success message

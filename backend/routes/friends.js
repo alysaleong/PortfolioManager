@@ -32,6 +32,33 @@ router.get('/', async (req, res) => {
     res.status(200).json(friends);
 });
 
+// remove friend 
+router.delete('/', async (req, res) => {
+    const uid = 2 //req.session.uid;
+    const friend = req.body.friend;
+
+    // delete the friendship
+    const friendship = await pool.query(
+        `DELETE FROM friends 
+        WHERE (u1 = $1 AND u2 = $2) OR (u1 = $2 and u1 = $1) RETURNING *`,
+        [uid, friend]
+    );
+    // if they weren't your friend 
+    if (friendship.rows.length === 0) {
+        return res.status(400).json({ error: "You are not friends with this user" });
+    }
+
+    // create a rejected request entry from friend to you 
+    // so they can't send you another request for another 5 min
+    await pool.query(
+        `INSERT INTO requested (requester, requestee, rejected_at)
+        VALUES ($1, $2, timezone('utc', now()))`,
+        [friend, uid]
+    )
+    res.status(200).json({ message: "Friend successfully removed"});
+});
+
+
 // INCOMING REQUESTS
 // get my incoming requests 
 router.get('/requests/incoming', async (req, res) => {
@@ -42,7 +69,7 @@ router.get('/requests/incoming', async (req, res) => {
     const requesters = await pool.query(
         `SELECT requester, email
         FROM requested JOIN users ON requested.requester = users.uid
-        WHERE requestee = $1`,
+        WHERE requestee = $1 AND rejected_at IS NULL`,
         [uid]
     );
     
@@ -64,8 +91,7 @@ router.post('/requests/accept', async (req, res) => {
     
     // if the friend request was not found
     if (result.rows.length === 0) {
-        res.status(400).json({ error: "No such friend request" });
-        return;
+        return res.status(400).json({ error: "No such friend request" });
     }
 
     // create a friendship
@@ -123,8 +149,8 @@ router.get('/requests/outgoing', async (req, res) => {
 
 // send a request
 router.post('/requests', async (req, res) => {
-    const uid = req.session.uid;
-    const requestee = req.body.requestee;
+    const uid = 4// req.session.uid;
+    const requestee = 2//req.body.requestee;
 
     // make sure the requestee is not the same as the requester
     if (uid === requestee) {
@@ -142,7 +168,6 @@ router.post('/requests', async (req, res) => {
     }
 
     // make sure there isn't already a request between these two
-    
     // check if you requested them
     const you_requested = await pool.query(
         `SELECT * FROM requested 
@@ -159,7 +184,7 @@ router.post('/requests', async (req, res) => {
         if (rejected_at) {
             // if it was rejected less than 5 minutes ago, don't allow to send another request
             if (now.getTime() - rejected_at.getTime() < five_minutes) {
-                return res.status(400).json({error: "You can't send another request yet" });
+                return res.status(400).json({error: "You can't send another request yet (wait 5 minutes)" });
             }
             // if it was rejected more than 5 minutes ago, update rejected_at to null
             await pool.query(
@@ -173,7 +198,6 @@ router.post('/requests', async (req, res) => {
             return res.status(400).json({error: "You already sent a request" });
         }
     }
-
     // check if they requested you
     const they_requested = await pool.query(
         `SELECT * FROM requested 
