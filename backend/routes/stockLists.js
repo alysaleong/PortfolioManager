@@ -166,7 +166,7 @@ router.patch('/:slid', async (req, res) => {
         }
 
         await client.query('COMMIT')
-        res.status(200).json({ message: "Stock list set to " + is_public ? "public" : "private" });
+        res.status(200).json({ message: `Stock list set to ${is_public ? "public" : "private"}` });
     } catch {
         client.query('ROLLBACK');
         res.status(500).json({ error: "Failed to update stock list" });

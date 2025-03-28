@@ -8,6 +8,15 @@
 ```
 ### res: success message
 
+## Set visiblity of stock list
+### req: PATCH http://localhost:4000/api/stocklists/:slid
+```
+{
+    "is_public": true
+}
+```
+### res: success message
+
 ## Add stocks to list 
 ### req: POST http://localhost:4000/api/stocklists/:slid
 ```
@@ -16,7 +25,7 @@
     "quantity": 8
 }
 ```
-### res: succes message
+### res: success message
 
 ## Remove stock from stock list
 ### req: DELETE http://localhost:4000/api/stocklists/:slid
