@@ -108,7 +108,7 @@ router.get('/requests/outgoing', async (req, res) => {
     let outgoing = [];
 
     // get all requestee for which I am the requester
-    const requestees = pool.query(
+    const requestees = await pool.query(
         `SELECT requestee, email 
         FROM requested JOIN users ON requested.requestee = users.uid
         WHERE requester = $1`,
@@ -125,33 +125,38 @@ router.post('/requests', async (req, res) => {
     const uid = req.session.uid;
     const requestee = req.body.requestee;
 
+    // make sure the requestee is not the same as the requester
+    if (uid === requestee) {
+        return res.status(400).json({error: "You can't send a request to yourself" });
+    }
+
     // make sure they aren't already friends
-    const are_friends = pool.query(
+    const are_friends = await pool.query(
         `SELECT * FROM friends 
         WHERE (u1 = $1 AND u2 = $2) OR (u1 = $2 AND u2 = $1)`,
         [uid, requestee]
     );
     if (are_friends.rows.length > 0) {
-        res.status(400).json({error: "You are already friends" });
+        return res.status(400).json({error: "You are already friends" });
     }
 
     // make sure there isn't already a request between these two
-    const you_requested = pool.query(
+    const you_requested = await pool.query(
         `SELECT * FROM requested 
         WHERE (requester = $1 AND requestee = $2)`,
         [uid, requestee]
     );
     if (you_requested.rows.length > 0) {
-        res.status(400).json({error: "You already sent a request" });
+        return res.status(400).json({error: "You already sent a request" });
     }
 
-    const they_requested = pool.query(
+    const they_requested = await pool.query(
         `SELECT * FROM requested 
         WHERE (requester = $1 AND requestee = $2)`,
         [requestee, uid]
     );
     if (they_requested.rows.length > 0) {
-        res.status(400).json({error: "They already sent you a request" });
+        return res.status(400).json({error: "They already sent you a request" });
     }
 
     // create the request
