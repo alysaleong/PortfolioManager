@@ -1,5 +1,5 @@
 ## Create a stocklist
-### req: http://localhost:4000/api/stocklists
+### req: POST http://localhost:4000/api/stocklists
 ```
 {
     "slname": "My Stock List", // optional
@@ -9,7 +9,7 @@
 ### res: success message
 
 ## Add stocks to list 
-### req: http://localhost:4000/api/stocklists/:slid
+### req: POST http://localhost:4000/api/stocklists/:slid
 ```
 {
     "symbol": "POO",
@@ -17,3 +17,12 @@
 }
 ```
 ### res: succes message
+
+## Remove stock from stock list
+### req: DELETE http://localhost:4000/api/stocklists/:slid
+```
+{
+    "symbol": "POO"
+}
+```
+### res: success message

@@ -113,6 +113,37 @@ router.post('/:slid', async (req, res) => {
     } 
 });
 
+// remove stock from a particular stock list
+router.delete('/:slid', async (req, res) => {
+    const uid = req.session.uid;
+    const slid = req.params.slid;
+    const symbol = req.body.symbol;
+
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+
+        // check if this portfolio belongs to this user
+        if (!await stocklist_owned_by(slid, uid)) {
+            return res.status(400).json({ error: "Invalid stock list id or you are not the owner of this stock list"});
+        }
+
+        // remove stock from in_list
+        await client.query(
+            `DELETE FROM in_list WHERE symbol = $1 AND slid = $2`,
+            [symbol, slid]
+        );
+
+        await client.query('COMMIT');
+        res.status(200).json({ message: "Removed stock from stock list" });
+    } catch (error) {   
+        await client.query('ROLLBACK');
+        res.status(500).json({ error: "Failed to remove stock from stock list" });
+    } finally {
+        client.release();
+    } 
+});
+
 // mark stock list public or private 
 router.patch('/:slid', async (req, res) => {
     const uid = req.session.uid;
