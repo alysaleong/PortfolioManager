@@ -39,11 +39,14 @@ router.post('/register', async (req, res) => {
     }
     
     // create an user with this email and hashed password
+    const client = await pool.connect();
     try {
+        await client.query('BEGIN');
+
         // hash the password
         const hashed_password = await bcrypt.hash(password, SALT_ROUNDS);
 
-        const result = await pool.query(
+        const result = await client.query(
             'INSERT INTO users (email, password) VALUES ($1, $2) RETURNING *', 
             [email, hashed_password]
         );
@@ -60,10 +63,13 @@ router.post('/register', async (req, res) => {
         req.session.email = user.email;
 
         // send response
+        await client.query('COMMIT');
         res.status(201).json({ message: "User registered" });
-
     } catch (error) {
+        await client.query('ROLLBACK');
         res.status(500).json({ error: "Error registering user, " + error});
+    } finally {
+        client.release();
     }
 });
 
