@@ -1,5 +1,6 @@
 import express from "express";
 import { pool } from "../server.js";
+import { stocklist_owned_by } from "../services/stocklistServices.js";
 
 const router = express.Router();
 
@@ -38,15 +39,17 @@ router.get('/:slid', async (req, res) => {
     res.status(200).json(stock_list.rows[0])
 });
 
-// get stock list stats 
+// TODO: get stock list stats 
 
 // create stock list
 router.post('/', async (req, res) => {
     const uid = req.session.uid;
-    const slname = req.body.slname; 
-    const is_public = req.body.is_public || false;
+    const slname = req.body.slname || "My Stock List"; // default name if not provided
+    const is_public = req.body.is_public || false; // default to private if not provided
 
-    const client = pool.connect();
+    console.log("Creating stock list", slname, is_public);
+
+    const client = await pool.connect();
     try {
         await client.query('BEGIN');
 
@@ -60,18 +63,41 @@ router.post('/', async (req, res) => {
         res.status(200).json({ message: "Stock list created" });
     } catch (error) {
         client.query('ROLLBACK');
-        res.status(500).json({ error: "Failed to create stock list" });
+        res.status(500).json({ error: "Failed to create stock list, " + error });
     } finally {
         client.release();
     }
 });
 
-// add stock to a particular stock list
+// TODO: add stock to a particular stock list
 router.post('/:slid', async (req, res) => {
     const uid = req.session.uid;
     const slid = req.params.slid;
+    const symbol = req.body.symbol;
+    const quantity = req.body.quantity || 0; // default to 0 if not provided
 
-    // get stock details from req body 
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+        
+        // check if this portfolio belongs to this user
+        if (!await stocklist_owned_by(slid, uid)) {
+            return res.status(400).json({ error: "Invalid stock list id or you are not the owner of this stock list"});
+        }
+
+        // add it to in_list
+        await client.query(
+            `INSERT INTO in_list (symbol, slid, quantity) VALUES ($1, $2, $3)`,
+            [symbol, slid, quantity]
+        );
+
+        await client.query('COMMIT');
+        res.status(200).json({ message: "Added stock to stock list" });
+    } catch (error) {   
+        await client.query('ROLLBACK');
+    } finally {
+        client.release();
+    } 
 });
 
 // mark stock list public or private 
@@ -80,7 +106,7 @@ router.patch('/:slid', async (req, res) => {
     const slid = req.params.slid;
     const is_public = req.body.is_public; 
 
-    const client = pool.connect();
+    const client = await pool.connect();
     try {
         await client.query('BEGIN');
 
@@ -110,7 +136,7 @@ router.delete('/:slid', async (req, res) => {
     const uid = req.session.uid;
     const slid = req.params.slid;
 
-    const client = pool.connect();
+    const client = await pool.connect();
     try {
         await client.query('BEGIN');
 

@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import { pool } from '../server.js'
 import portfoliosRouter from './portfolio.js';
 import friendsRouter from './friends.js';
-import stockListsRouter from './stockLists.js';
+import stockListsRouter from './stocklists.js';
 import { isAuth } from '../middleware/authMiddleware.js'
 
 const router = express.Router();
