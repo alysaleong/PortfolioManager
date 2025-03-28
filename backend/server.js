@@ -23,6 +23,12 @@ async function connectToPG() {
     }
 }
 connectToPG();
+// timestamps without a timezone are stored in utc and should be parsed as such
+// (they are assumed to be in the local timezone when they are created and pg
+// automatically converts thems but that makes the timestamps incorrect)
+pg.types.setTypeParser(1114, function(stringValue) {
+    return new Date(stringValue + 'Z');
+});
 export { pool };
 
 // set up sessions
