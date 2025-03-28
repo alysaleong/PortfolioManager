@@ -43,7 +43,27 @@ router.get('/:slid', async (req, res) => {
 // create stock list
 router.post('/', async (req, res) => {
     const uid = req.session.uid;
+    const slname = req.body.slname; 
+    const is_public = req.body.is_public || false;
 
+    const client = pool.connect();
+    try {
+        await client.query('BEGIN');
+
+        // create stock list
+        await client.query(
+            `INSERT INTO stock_lists (uid, slname, public) VALUES ($1, $2, $3)`,
+            [uid, slname, is_public]
+        );
+        
+        client.query('COMMIT');
+        res.status(200).json({ message: "Stock list created" });
+    } catch (error) {
+        client.query('ROLLBACK');
+        res.status(500).json({ error: "Failed to create stock list" });
+    } finally {
+        client.release();
+    }
 });
 
 // add stock to a particular stock list
@@ -59,12 +79,60 @@ router.patch('/:slid', async (req, res) => {
     const uid = req.session.uid;
     const slid = req.params.slid;
     const is_public = req.body.is_public; 
+
+    const client = pool.connect();
+    try {
+        await client.query('BEGIN');
+
+        // update entry with new public status
+        const result = await client.query(
+            `UPDATE stock_lists SET public = $1 WHERE slid = $2 AND uid = $3 RETURNING *`,
+            [is_public, slid, uid]
+        );
+
+        // if nothing updated, slid wrong or user doesn't own that stock list
+        if (result.rows.length === 0) {
+            return res.status(400).json({ error: "Invalid stock list id or you are not the owner of this stock list"});
+        }
+
+        await client.query('COMMIT')
+        res.status(200).json({ message: "Stock list set to " + is_public ? "public" : "private" });
+    } catch {
+        client.query('ROLLBACK');
+        res.status(500).json({ error: "Failed to update stock list" });
+    } finally {
+        client.release();
+    }
 });
 
 // delete stock list
 router.delete('/:slid', async (req, res) => {
     const uid = req.session.uid;
     const slid = req.params.slid;
+
+    const client = pool.connect();
+    try {
+        await client.query('BEGIN');
+
+        // delete stock list
+        const result = await client.query(
+            `DELETE FROM stock_lists WHERE slid = $1 AND uid = $2 RETURNING *`,
+            [slid, uid]
+        );
+
+        // if nothing deleted, slid wrong or user doesn't own that stock list
+        if (result.rows.length === 0) {
+            return res.status(400).json({ error: "Invalid stock list id or you are not the owner of this stock list"});
+        }
+
+        await client.query('COMMIT')
+        res.status(200).json({ message: "Stock list deleted" });
+    } catch (error) {
+        client.query('ROLLBACK');
+        res.status(500).json({ error: "Failed to delete stock list" });
+    } finally {
+        client.release();
+    }
 });
 
 
