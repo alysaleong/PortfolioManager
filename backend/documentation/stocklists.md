@@ -7,3 +7,13 @@
 }
 ```
 ### res: success message
+
+## Add stocks to list 
+### req: http://localhost:4000/api/stocklists/:slid
+```
+{
+    "symbol": "POO",
+    "quantity": 8
+}
+```
+### res: succes message

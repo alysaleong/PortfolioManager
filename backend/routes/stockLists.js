@@ -85,7 +85,20 @@ router.post('/:slid', async (req, res) => {
             return res.status(400).json({ error: "Invalid stock list id or you are not the owner of this stock list"});
         }
 
-        // add it to in_list
+        // if this stock is already in_list, update quantity
+        const stock_in_list = await client.query(
+            `SELECT * FROM in_list WHERE symbol = $1 AND slid = $2`,
+            [symbol, slid]
+        );
+        if (stock_in_list.rows.length > 0) {
+            await client.query(
+                `UPDATE in_list SET quantity = quantity + $1 WHERE symbol = $2 AND slid = $3`,
+                [quantity, symbol, slid]
+            );
+            await client.query('COMMIT');
+            return res.status(200).json({ message: "Updated stock quantity" });   
+        }
+        // otherwise add it to in_list
         await client.query(
             `INSERT INTO in_list (symbol, slid, quantity) VALUES ($1, $2, $3)`,
             [symbol, slid, quantity]
