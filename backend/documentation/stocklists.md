@@ -1,3 +1,28 @@
+# Stock lists
+## Get stock list
+### req: GET http://localhost:4000/api/stocklists
+### res: 
+```json
+[
+    {
+        "slid": 5,
+        "slname": "My Stock List",
+        "public": false
+    },
+    {
+        "slid": 7,
+        "slname": "ALYSA",
+        "public": true
+    },
+    {
+        "slid": 4,
+        "slname": "My Stock List",
+        "public": true
+    }
+]
+```
+
+
 ## Create a stocklist
 ### req: POST http://localhost:4000/api/stocklists
 ```json
@@ -17,26 +42,12 @@
 ```
 ### res: success message
 
-## Add stocks to list 
-### req: POST http://localhost:4000/api/stocklists/:slid/stocks
-```json
-{
-    "symbol": "POO",
-    "quantity": 8
-}
-```
+## Delete stocklist
+### req: DELETE http://localhost:4000/api/stocklists/:slid
 ### res: success message
 
-## Remove stock from stock list
-### req: DELETE http://localhost:4000/api/stocklists/:slid/stocks
-```json
-{
-    "symbol": "POO",
-    "quantity": 70 // optional, if not included or greater than quantity, it will delete the stock 
-}
-```
-### res: success message
 
+# Stocks in Stock List
 ## Get a stock list 
 ### req: GET http://localhost:4000/api/stocklists/:slid
 ### res: 
@@ -68,3 +79,23 @@
     ]
 }
 ```
+
+## Add stocks to list 
+### req: POST http://localhost:4000/api/stocklists/:slid/stocks
+```json
+{
+    "symbol": "POO",
+    "quantity": 8
+}
+```
+### res: success message
+
+## Remove stock from stock list
+### req: DELETE http://localhost:4000/api/stocklists/:slid/stocks
+```json
+{
+    "symbol": "POO",
+    "quantity": 70 // optional, if not included or greater than quantity, it will delete the stock 
+}
+```
+### res: success message
