@@ -1,7 +1,7 @@
 // api/stocklists
 import express from "express";
 import { pool } from "../server.js";
-import { stocklist_owned_by } from "../services/stocklistServices.js";
+import { is_stocklist_owned_by } from "../services/stocklistServices.js";
 
 const router = express.Router();
 
@@ -17,7 +17,11 @@ router.get('/', async (req, res) => {
     res.status(200).json(stock_lists.rows);
 });
 
+// TODO: get public stocklists ids
+
 // get stock list by slid and include stocks in it
+// TODO: public can be viewed by anyone 
+//       private can only be viewed by the owner and friends invited to review it
 router.get('/:slid', async (req, res) => {
     const uid = req.session.uid;
     const slid = req.params.slid;
@@ -57,6 +61,7 @@ router.get('/:slid', async (req, res) => {
 
     res.status(200).json(stock_list_with_stocks);
 });
+
 
 // TODO: get stock list stats
 
@@ -104,7 +109,7 @@ router.post('/:slid/stocks', async (req, res) => {
         await client.query('BEGIN');
         
         // check if this portfolio belongs to this user
-        if (!await stocklist_owned_by(slid, uid)) {
+        if (!await is_stocklist_owned_by(slid, uid)) {
             return res.status(400).json({ error: "Invalid stock list id or you are not the owner of this stock list"});
         }
 
@@ -157,7 +162,7 @@ router.delete('/:slid/stocks', async (req, res) => {
         await client.query('BEGIN');
 
         // check if this portfolio belongs to this user
-        if (!await stocklist_owned_by(slid, uid)) {
+        if (!await is_stocklist_owned_by(slid, uid)) {
             return res.status(400).json({ error: "Invalid stock list id or you are not the owner of this stock list" });
         }
 

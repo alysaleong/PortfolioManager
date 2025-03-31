@@ -5,6 +5,7 @@ import { pool } from '../server.js'
 import portfoliosRouter from './portfolio.js';
 import friendsRouter from './friends.js';
 import stockListsRouter from './stocklists.js';
+import reviewsRouter from './reviews.js';
 import { isAuth } from '../middleware/authMiddleware.js'
 
 const router = express.Router();
@@ -132,5 +133,6 @@ router.get('/logout', async (req, res) => {
 router.use('/portfolios', isAuth, portfoliosRouter);
 router.use('/friends', isAuth, friendsRouter);
 router.use('/stocklists', isAuth, stockListsRouter);
+router.use('/reviews', isAuth, reviewsRouter);
 
 export default router;
