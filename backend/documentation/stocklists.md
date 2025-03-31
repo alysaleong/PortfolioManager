@@ -1,6 +1,6 @@
 ## Create a stocklist
 ### req: POST http://localhost:4000/api/stocklists
-```
+```json
 {
     "slname": "My Stock List", // optional
     "is_public": false // optional
@@ -10,7 +10,7 @@
 
 ## Set visiblity of stock list
 ### req: PATCH http://localhost:4000/api/stocklists/:slid
-```
+```json
 {
     "is_public": true
 }
@@ -18,8 +18,8 @@
 ### res: success message
 
 ## Add stocks to list 
-### req: POST http://localhost:4000/api/stocklists/:slid
-```
+### req: POST http://localhost:4000/api/stocklists/:slid/stocks
+```json
 {
     "symbol": "POO",
     "quantity": 8
@@ -28,10 +28,43 @@
 ### res: success message
 
 ## Remove stock from stock list
-### req: DELETE http://localhost:4000/api/stocklists/:slid
-```
+### req: DELETE http://localhost:4000/api/stocklists/:slid/stocks
+```json
 {
-    "symbol": "POO"
+    "symbol": "POO",
+    "quantity": 70 // optional, if not included or greater than quantity, it will delete the stock 
 }
 ```
 ### res: success message
+
+## Get a stock list 
+### req: GET http://localhost:4000/api/stocklists/:slid
+### res: 
+```json
+{
+    "slid": 4,
+    "slname": "My Stock List",
+    "public": true,
+    "uid": 2,
+    "stocks": [
+        {
+            "symbol": "ABC",
+            "quantity": 6,
+            "curr_val": "94.22",
+            "total_value": "565.32"
+        },
+        {
+            "symbol": "O",
+            "quantity": 7,
+            "curr_val": "48.92",
+            "total_value": "342.44"
+        },
+        {
+            "symbol": "POO",
+            "quantity": 100,
+            "curr_val": "420.69",
+            "total_value": "42069.00"
+        }
+    ]
+}
+```

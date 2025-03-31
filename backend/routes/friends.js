@@ -1,3 +1,4 @@
+// /api/friends
 import express from 'express';
 import { pool } from '../server.js';
 
