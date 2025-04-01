@@ -1,7 +1,8 @@
+// /api/reviews
 import express from "express";
 import { pool } from "../server.js";
 import { is_stocklist_owned_by, is_stocklist_public } from "../services/stocklistServices.js";
-import { is_friend } from "../services/friendServices.js";
+import { is_friend, can_review } from "../services/friendsServices.js";
 const router = express.Router();
 
 // TODO: maybe create assertion for reviews can only be done by friends on 
@@ -63,14 +64,18 @@ router.get('/:slid/user/:reviewer', async (req, res) => {
 });
 
 
-// TODO: invite a friend to review your stocklist (untested)
+// invite a friend to review your stocklist
 //  - check if this stocklist is owned by this user because only the owner can invite friends to review it
 //  - creates a blank review 
 //  - if list is private, need to check person you invite is your friend
-router.post('/invite', async (req, res) => {
+router.post('/:slid/invite', async (req, res) => {
     const uid = req.session.uid;
     const friend = req.body.friend; 
-    const slid = req.body.slid;
+    const slid = req.params.slid;
+
+    if (uid == friend) {
+        return res.status(400).json({ error: "You cannot invite yourself to review your stock list" });
+    }
 
     const client = await pool.connect();
     try {
@@ -80,7 +85,7 @@ router.post('/invite', async (req, res) => {
         if (!await is_stocklist_owned_by(slid, uid)) {
             return res.status(400).json({ error: "Invalid stock list id or you are not the owner of this stock list" });
         }
-        // check if the stock list is private and if the friend is a friend of this user
+        // check if the stock list is private, the friend is must be a friend of this user
         if (!await is_stocklist_public(slid) && !await is_friend(uid, friend)) {
             return res.status(400).json({ error: "You can only invite friends to review your stock list" });
         }
@@ -100,12 +105,12 @@ router.post('/invite', async (req, res) => {
     }
 });
 
-// TODO: create a review for a public stocklist (untested)
+// create a review for a public stocklist
 //  - check stocklist is public 
 //  - check review is <= 4000 char
-router.post('/', async (req, res) => {
+router.post('/:slid', async (req, res) => {
     const uid = req.session.uid;
-    const slid = req.body.slid;
+    const slid = req.params.slid;
     const review = req.body.review;
 
     // check if this stocklist is public
@@ -137,26 +142,19 @@ router.post('/', async (req, res) => {
     }
 });
 
-// TODO: create/edit a review for a stocklist you were invited to review (untested)
+// create/edit a review for a stocklist you were invited to review
 //  - check you were invited to review this
 //  - or that this stock list is public
 //  - review <= 4000 char
-router.patch('/', async (req, res) => {
-    const uid = req.session.uid;
-    const slid = req.body.slid; 
+router.patch('/:slid', async (req, res) => {
+    const uid = 5//req.session.uid;
+    const slid = req.params.slid; 
     const review = req.body.review || "";
 
     // check if you were invited to review this stocklist (i.e. there exists a review for this stocklist by this user)
     // or check if this stocklist is public
-    if (!await is_stocklist_public(slid)) {
-        // check if review with this uid and slid exists
-        const invited = await pool.query(
-            `SELECT * FROM reviews WHERE uid = $1 AND slid = $2`,
-            [uid, slid]
-        );
-        if (invited.rows.length === 0) {
-            return res.status(400).json({ error: "You were not invited to review this stock list" });
-        }
+    if (!await can_review(uid, slid)) {
+        return res.status(400).json({ error: "Invalid stock list id or you were not invited to review this stock list" });
     }
 
     // check if the review is less than 4000 characters
@@ -173,6 +171,10 @@ router.patch('/', async (req, res) => {
             `UPDATE reviews SET review = $1 WHERE uid = $2 AND slid = $3`,
             [review, uid, slid]
         );
+
+        if (review.length == 0) {
+            return res.status(200).json({ error: "You don't have a review for this stock list" });
+        }
 
         await client.query('COMMIT');
         return res.status(200).json({ message: "Review updated" });

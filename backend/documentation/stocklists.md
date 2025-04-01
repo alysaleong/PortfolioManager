@@ -22,6 +22,19 @@
 ]
 ```
 
+## Get stocklists that I am reviewing/am invited to review
+### req: GET http://localhost:4000/api/stocklists/reviewing
+### res: 
+```json
+[
+    {
+        "slid": 4,
+        "slname": "My Stock List",
+        "public": true
+    }
+]
+```
+
 
 ## Create a stocklist
 ### req: POST http://localhost:4000/api/stocklists
@@ -48,7 +61,7 @@
 
 
 # Stocks in Stock List
-## Get a stock list 
+## Get a stock list (needs to be public stocklist or you need to be the owner/someone reviewing it)
 ### req: GET http://localhost:4000/api/stocklists/:slid
 ### res: 
 ```json

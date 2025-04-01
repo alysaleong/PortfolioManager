@@ -2,15 +2,28 @@
 import express from "express";
 import { pool } from "../server.js";
 import { is_stocklist_owned_by } from "../services/stocklistServices.js";
+import { can_review } from "../services/friendsServices.js";
 
 const router = express.Router();
 
-// get all stock lists
+// get all of your stock lists
 router.get('/', async (req, res) => {
     const uid = req.session.uid;
 
     const stock_lists = await pool.query(
         `SELECT slid, slname, public FROM stock_lists WHERE uid = $1`,
+        [uid]
+    );
+    
+    res.status(200).json(stock_lists.rows);
+});
+
+// get all stocklist I am reviewing 
+router.get('/reviewing', async (req, res) => {
+    const uid = 5//req.session.uid;
+    const stock_lists = await pool.query(
+        `SELECT slid, slname, public FROM stock_lists 
+        WHERE slid IN (SELECT slid FROM reviews WHERE uid = $1)`,
         [uid]
     );
     
@@ -36,8 +49,9 @@ router.get('/:slid', async (req, res) => {
         return res.status(400).json({ error: "There is no stock list with this id" });
     }
 
-    // if this stock list doesn't belong to the user 
-    if (stock_list.rows[0].uid != uid) {
+    // if you arent the owner or a reviewer of this stock list, return error
+    if (stock_list.rows[0].uid != uid && !await can_review(uid, slid)) { 
+        console.log("Not allowed to view this stock list")
         return res.status(400).json({ error: "This stock list doesn't belong to you" });
     }
 
