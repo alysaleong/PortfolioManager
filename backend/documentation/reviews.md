@@ -1,5 +1,5 @@
 ## Get all the reviews for a stock list
-### req: GET 
+### req: GET http://localhost:4000/api/reviews/:slid
 ### res: 
 ```json
 [
@@ -60,3 +60,15 @@
 ###
 - invited uid must be a friend of the logged in user
 - cannot invite urself or the same person multiple times
+
+
+## Delete a review
+### req: DELETE http://localhost:4000/api/reviews/:slid
+```json
+{
+    "reviwer": 5
+}
+```
+### res: success message
+- only the owner of the list or the reviewer can delete the review
+- no error if you try to delete the same thing mult times

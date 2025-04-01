@@ -189,9 +189,9 @@ router.patch('/:slid', async (req, res) => {
 
 // TODO: delete review (untested)
 //  - can be deleted by owner of stocklist or reviewer
-router.delete('/', async (req, res) => {
+router.delete('/:slid', async (req, res) => {
     const uid = req.session.uid; 
-    const slid = req.body.slid; 
+    const slid = req.params.slid; 
     const reviewer = req.body.reviewer || null; //  reviewer is optional, if not provided, delete the review for this user
 
     // if user isnt the owner or reviewer, return error

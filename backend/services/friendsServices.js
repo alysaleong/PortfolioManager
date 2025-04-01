@@ -13,12 +13,16 @@ export async function is_friend(uid, friend) {
 export async function can_review(uid, slid) {
     // get visibility of the stocklist
     const stocklist = await pool.query(
-        `SELECT public FROM stock_lists WHERE slid = $1`,
+        `SELECT uid, public FROM stock_lists WHERE slid = $1`,
         [slid]
     );
     // if the stocklist does not exist, return false
     if (stocklist.rows.length === 0) return false;
+    const owner = stocklist.rows[0].uid;
     const is_public = stocklist.rows[0].public;
+
+    // owner cannot review their own stocklist
+    if (owner === uid) return false;
 
     // if the stocklist is public, return true
     if (is_public) return true;
