@@ -1,3 +1,34 @@
+## Get all the reviews for a stock list
+### req: GET 
+### res: 
+```json
+[
+    {
+        "uid": 2,
+        "review": "this is a great list man public"
+    },
+    {
+        "uid": 5,
+        "review": ""
+    }
+]
+```
+- only the owner can get all reviews if its a private list
+- if its public, anyone can get all reviews
+
+## Get review for stocklist written by some user
+### req: GET http://localhost:4000/api/reviews/:slid/users/:reviewer_uid
+### res: 
+```json
+{
+    "uid": 5,
+    "review": "this is a great list man"
+}
+```
+- owner can get all reviews of their stock lists 
+- if public stock list, anyone can see reviews for it
+- error if that user doesnt have a review 
+
 ## Create a review for a public stock list
 ### req: POST http://localhost:4000/api/reviews/:slid 
 ```json

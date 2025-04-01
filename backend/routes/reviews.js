@@ -9,7 +9,7 @@ const router = express.Router();
 //  private lists
 
 
-// TODO: get reviews for this stocklist (untested)
+// get reviews for this stocklist
 //  - for public stock list, reviews can be read by anyone
 //  - for private, can only be viewed by stocklist owner
 router.get('/:slid', async (req, res) => {
@@ -36,7 +36,7 @@ router.get('/:slid', async (req, res) => {
 // TODO: get reviewer's review for this stocklist (untested)
 //  - for public stock list, reviews can be read by anyone
 //  - for private, can only be viewed by stocklist owner or reviewer
-router.get('/:slid/user/:reviewer', async (req, res) => {
+router.get('/:slid/users/:reviewer', async (req, res) => {
     const uid = req.session.uid;
     const slid = req.params.slid;
     const reviewer = req.params.reviewer;
@@ -147,7 +147,7 @@ router.post('/:slid', async (req, res) => {
 //  - or that this stock list is public
 //  - review <= 4000 char
 router.patch('/:slid', async (req, res) => {
-    const uid = 5//req.session.uid;
+    const uid = req.session.uid;
     const slid = req.params.slid; 
     const review = req.body.review || "";
 
