@@ -12,20 +12,30 @@ router.get('/', async (req, res) => {
 
     try {
         // get all u2 where u1=uid
-        const u2 = await pool.query(
+        let u2 = await pool.query(
             `SELECT u2, email 
             FROM friends JOIN users ON friends.u2 = users.uid
             WHERE u1 = $1`,
             [uid]
         );
+        u2.rows = u2.rows.map(user => {
+            user.uid = user.u2;
+            delete user.u2;
+            return user;
+        });
 
         // get all u1 where u2=uid
-        const u1 = await pool.query(
+        let u1 = await pool.query(
             `SELECT u1, email 
             FROM friends JOIN users ON friends.u1 = users.uid
             WHERE u2 = $1`,
             [uid]
         );
+        u1.rows = u1.rows.map(user => {
+            user.uid = user.u1;
+            delete user.u1;
+            return user;
+        });
 
         // combine them to get the friends list 
         friends = friends.concat(u1.rows);
@@ -49,7 +59,7 @@ router.delete('/', async (req, res) => {
         // delete the friendship
         const friendship = await client.query(
             `DELETE FROM friends 
-            WHERE (u1 = $1 AND u2 = $2) OR (u1 = $2 and u1 = $1) RETURNING *`,
+            WHERE (u1 = $1 AND u2 = $2) OR (u1 = $2 AND u2 = $1) RETURNING *`,
             [uid, friend]
         );
         // if they weren't your friend 

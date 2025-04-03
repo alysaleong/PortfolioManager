@@ -4,15 +4,15 @@
 ```
 [
     {
-        "u1": 5,
+        "uid": 5,
         "email": "stupid5@stupid.com"
     },
     {
-        "u2": 3,
+        "uid": 3,
         "email": "stupid3@stupid.com"
     },
     {
-        "u2": 4,
+        "uid": 4,
         "email": "stupid4@stupid.com"
     }
 ]
@@ -91,7 +91,7 @@
 ### res: success message
 
 ## Remove a friend  
-### req: POST http://localhost:4000/api/friends
+### req: DELETE http://localhost:4000/api/friends
 ```
 {
     "friend": 1

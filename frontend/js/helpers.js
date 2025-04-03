@@ -12,6 +12,17 @@ export async function sendRequest(endpoint, method = 'GET', body = null) {
     return response.json();
 }
 
+// helper to check if user is logged in
+export async function checkLoginStatus() {
+    try {
+        const response = await sendRequest('/me');
+        return response.uid !== undefined;
+    } catch (error) {
+        console.error("Error checking login status:", error);
+        return false;
+    }
+}
+
 export function populateDropdown(dropdown, options, values) {
     for (let i= 0; i < options.length; i++) {
         const item = options[i];

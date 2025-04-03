@@ -1,16 +1,8 @@
-import { sendRequest } from './helpers.js';
+import { checkLoginStatus } from './helpers.js';
+import { loadFriends } from './friends.js';
+import { loadIncomingRequest, loadOutgoingRequest } from './requests.js';
 
-// check if user is logged in
-async function checkLoginStatus() {
-    try {
-        const response = await sendRequest('/me');
-        return response.uid !== undefined;
-    } catch (error) {
-        console.error("Error checking login status:", error);
-        return false;
-    }
-}
-
+// update the page based on login status
 export async function updatePage(isLoggedIn = null) {
     // check if they are logged in 
     if (isLoggedIn === null) {
@@ -25,6 +17,9 @@ export async function updatePage(isLoggedIn = null) {
     if (isLoggedIn) {
         authSection.style.display = 'none';
         mainContent.style.display = 'block';
+        loadFriends();
+        loadIncomingRequest();
+        loadOutgoingRequest();
     } else {
         authSection.style.display = 'block';
         mainContent.style.display = 'none';
@@ -45,7 +40,7 @@ function setupNavigation() {
             contentSections.forEach(section => {
                 section.style.display = 'none';
             });
-            
+
             const targetSection = document.getElementById(targetId);
             if (targetSection) {
                 targetSection.style.display = 'block';
@@ -57,5 +52,5 @@ function setupNavigation() {
 // Call updatePage and setupNavigation on page load
 document.addEventListener('DOMContentLoaded', () => {
     updatePage();
-    setupNavigation();
+    setupNavigation(); 
 });

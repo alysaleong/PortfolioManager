@@ -9,6 +9,7 @@
     <script type="module" src="./js/friends.js" defer></script>
     <script type="module" src="./js/stocklists.js" defer></script>
     <script type="module" src="./js/reviews.js" defer></script>
+    <script type="module" src="./js/requests.js" defer></script>
     <link href="style/main.css" rel="stylesheet" type="text/css">
 </head>
 <body>
@@ -35,24 +36,33 @@
 
         <section id="main-content" style="display: none;">
             <nav>
-                <button class="nav-button" data-target="friend-content">Friends</button>
-                <button class="nav-button" data-target="stocklist-content">Stock Lists</button>
-                <button class="nav-button" data-target="review-content">Reviews</button>
+                <!-- <button class="nav-button" id="portfolio-tab" data-target="portfolio-content">Portfolio</button> -->
+                <button class="nav-button" id="friends-tab" data-target="friend-content">Friends</button>
+                <button class="nav-button" id="requests-tab" data-target="request-content">Requests</button>
+                <button class="nav-button" id="stocklists-tab" data-target="stocklist-content">Stock Lists</button>
+                <button class="nav-button" id="reviews-tab" data-target="review-content">Reviews</button>
                 <button id="logout-button">Logout</button>
             </nav>
-            <section id="friend-content" class="content-section">
+            <section id="friend-content" class="content-section" style="display: none;">
                 <h2>Friends</h2>
-                <button id="get-friends">Get Friends</button>
-                <form id="add-friend-form">
-                    <h3>Add Friend</h3>
-                    <input type="text" name="friend" placeholder="User's Email or UID" required>
-                    <button type="submit">Add Friend</button>
+                <form id="add-friend-form" class="sub-content-section">
+                    <h3>Send Friend Request</h3>
+                    <input type="text" name="email" placeholder="User's Email" required>
+                    <button type="submit">Send request</button>
                 </form>
-                <form id="remove-friend-form">
-                    <h3>Remove Friend</h3>
-                    <input type="text" name="friend" placeholder="Friend UID" required>
-                    <button type="submit">Remove Friend</button>
-                </form>
+                <div id="friends-list" class="sub-content-section">
+                    <h3>Your Friends</h3>
+                </div>
+            </section>
+
+            <section id="request-content" class="content-section" style="display: none;">
+                <h2>Requests</h2>
+                <div id="incoming-requests-list" class="sub-content-section">
+                    <h3>Incoming Requests</h3>
+                </div>
+                <div id="outgoing-requests-list" class="sub-content-section">
+                    <h3>Outgoing Requests</h3>
+                </div>
             </section>
 
             <section id="stocklist-content" class="content-section" style="display: none;">
