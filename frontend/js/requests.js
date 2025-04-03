@@ -12,8 +12,10 @@ export async function loadIncomingRequest() {
         requestElmt.classList.add('request-item');
         requestElmt.innerHTML = `
             <div class="request-email">${request.email}</div>
-            <button class="accept-request-button" data-uid="${request.requester}">Accept</button>
-            <button class="reject-request-button" data-uid="${request.requester}">Reject</button>
+            <div class="request-buttons">
+                <button class="accept-request-button" data-uid="${request.requester}">Accept</button>
+                <button class="reject-request-button" data-uid="${request.requester}">Reject</button>
+            </div>
         `;
         incomingRequests.appendChild(requestElmt);
     });

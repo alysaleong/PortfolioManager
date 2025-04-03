@@ -5,8 +5,16 @@ let selectedStockListId = null;
 // load all stock lists
 export async function loadStockLists() {
     const stockListsContainer = document.getElementById('stocklists-container');
-    stockListsContainer.innerHTML = ''; // Clear the container
+    // const stockListDetailsContainer = document.getElementById('stocklist-details');
+    // const stocksContainer = document.getElementById('stocks-container');
+    // const addStockForm = document.getElementById('add-stock-form');
 
+    // // Clear the container and hide details
+    // stockListsContainer.innerHTML = ''; 
+    // stockListDetailsContainer.style.display = 'none';
+    // stocksContainer.style.display = 'none';
+    // addStockForm.style.display = 'none';
+    stockListsContainer.innerHTML = '<h3>Your Stock Lists</h3>'; // clear the list before populating
     const stockLists = await sendRequest('/stocklists');
     stockLists.forEach(stockList => {
         const stockListEl = document.createElement('div');
@@ -26,7 +34,7 @@ async function selectStockList(slid) {
     selectedStockListId = slid;
     const stockListDetails = await sendRequest(`/stocklists/${slid}`);
     const stockListDetailsContainer = document.getElementById('stocklist-details');
-    const stocksContainer = document.getElementById('stocks-container');
+    const stocksContainer = document.getElementById('stocks-in-list-container');
     const addStockForm = document.getElementById('add-stock-form');
 
     // display stock list details
@@ -45,7 +53,7 @@ async function selectStockList(slid) {
     });
 
     // display stocks in the stock list
-    stocksContainer.innerHTML = '';
+    stocksContainer.innerHTML = `<h3>Stocks in ${stockListDetails.slname}</h3>`;
     stockListDetails.stocks.forEach(stock => {
         const stockEl = document.createElement('div');
         stockEl.classList.add('stock-item');
@@ -102,7 +110,6 @@ document.getElementById('create-stocklist-form').addEventListener('submit', asyn
     alert(result.message);
     await loadStockLists(); // reload stock lists
 });
-
 
 // load stock lists on page load
 document.getElementById('stocklists-tab').addEventListener('click', async () => {
