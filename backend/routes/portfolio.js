@@ -321,16 +321,3 @@ router.post('/sell', async (req, res) => {
         client.release();
     }
 });
-
-// const client = await pool.connect();
-//     try {
-//         await client.query('BEGIN');
-
-//         await client.query("COMMIT");
-//         res.status(200).json({message: ``});
-//     } catch (error) {
-//         await client.query("ROLLBACK");
-//         res.status(500).json({error: "Insert failed"});
-//     } finally {
-//         client.release();
-//     };
