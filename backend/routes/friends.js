@@ -281,7 +281,7 @@ router.post('/requests', async (req, res) => {
         // check if they requested you
         const they_requested = await client.query(
             `SELECT * FROM requested 
-            WHERE (requester = $1 AND requestee = $2)`,
+            WHERE (requester = $1 AND requestee = $2) AND rejected_at IS NULL`,
             [requestee, uid]
         );
         if (they_requested.rows.length > 0) {
