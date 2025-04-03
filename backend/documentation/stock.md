@@ -27,12 +27,34 @@
 ```
 
 ### Compute COV of the given stock for the given time interval
-#### req: POST http://localhost:4000/api/stocks/:symbol/cov
+#### req: POST http://localhost:4000/api/stocks/symbol/:symbol/cov
 #### res:
 ```
 [
     {
         "cov": "0.00640617433114275665"
+    }
+]
+```
+
+### Compute Beta coefficient of the given stock for the given time interval
+#### req: POST http://localhost:4000/api/stocks/symbol/:symbol/beta
+#### res:
+```
+[
+    {
+        "beta": 9.093142870299663e-16
+    }
+]
+```
+
+### Compute covariance of the given stocks for the given time interval
+#### req: POST http://localhost:4000/api/stocks/cov
+#### res:
+```
+[
+    {
+        "cov": -1.1132959633540298e-15
     }
 ]
 ```
