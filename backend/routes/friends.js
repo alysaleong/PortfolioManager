@@ -196,7 +196,22 @@ router.get('/requests/outgoing', async (req, res) => {
 // send a request
 router.post('/requests', async (req, res) => {
     const uid = req.session.uid;
-    const requestee = req.body.requestee;
+    let requestee = req.body.requestee || null;
+    // if not id, get email and convert to uid
+    if (!requestee) {
+        const email = req.body.email;
+        // convert email to uid
+        requestee = await pool.query(
+            `SELECT uid FROM users WHERE email = $1`,
+            [email]
+        );
+        // if the email doesn't exist, return error
+        if (requestee.rows.length === 0) {
+            return res.status(400).json({error: "No such user" });
+        }
+        requestee = requestee.rows[0].uid;
+    }
+
 
     const client = await pool.connect();
     try {

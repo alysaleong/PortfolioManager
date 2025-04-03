@@ -2,6 +2,7 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
 import { pool } from '../server.js'
+import usersRouter from './users.js';
 import portfoliosRouter from './portfolio.js';
 import friendsRouter from './friends.js';
 import stockListsRouter from './stocklists.js';
@@ -130,6 +131,7 @@ router.get('/logout', async (req, res) => {
 
 
 // ROUTES
+router.use('/users', isAuth, usersRouter);
 router.use('/portfolios', isAuth, portfoliosRouter);
 router.use('/friends', isAuth, friendsRouter);
 router.use('/stocklists', isAuth, stockListsRouter);

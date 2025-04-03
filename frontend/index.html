@@ -1,14 +1,83 @@
-<!doctype html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>StockPortfolio</title>
-        <script type="module" src="./js/index.js"></script>
-        <link href="style/main.css" rel="stylesheet" type="text/css">
-    </head>
-    <body>
-        <header>
-            Stock Portfolio
-        </header>
-    </body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Manager</title>
+    <script type="module" src="./js/index.js" defer></script>
+    <script type="module" src="./js/auth.js" defer></script>
+    <script type="module" src="./js/friends.js" defer></script>
+    <script type="module" src="./js/stocklists.js" defer></script>
+    <script type="module" src="./js/reviews.js" defer></script>
+    <link href="style/main.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+    <header>
+        <h1>Portfolio Manager</h1>
+    </header>
+    <main>
+        <section id="auth-section">
+            <h2>Authentication</h2>
+            <form id="register-form">
+                <h3>Register</h3>
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <input type="number" name="cash" placeholder="Initial Cash (optional)">
+                <button type="submit">Register</button>
+            </form>
+            <form id="login-form">
+                <h3>Login</h3>
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <button type="submit">Login</button>
+            </form>
+        </section>
+
+        <section id="main-content" style="display: none;">
+            <nav>
+                <button class="nav-button" data-target="friend-content">Friends</button>
+                <button class="nav-button" data-target="stocklist-content">Stock Lists</button>
+                <button class="nav-button" data-target="review-content">Reviews</button>
+                <button id="logout-button">Logout</button>
+            </nav>
+            <section id="friend-content" class="content-section">
+                <h2>Friends</h2>
+                <button id="get-friends">Get Friends</button>
+                <form id="add-friend-form">
+                    <h3>Add Friend</h3>
+                    <input type="text" name="friend" placeholder="User's Email or UID" required>
+                    <button type="submit">Add Friend</button>
+                </form>
+                <form id="remove-friend-form">
+                    <h3>Remove Friend</h3>
+                    <input type="text" name="friend" placeholder="Friend UID" required>
+                    <button type="submit">Remove Friend</button>
+                </form>
+            </section>
+
+            <section id="stocklist-content" class="content-section" style="display: none;">
+                <h2>Stock Lists</h2>
+                <button id="get-stocklists">Get Stock Lists</button>
+                <form id="create-stocklist-form">
+                    <h3>Create Stock List</h3>
+                    <input type="text" name="slname" placeholder="Stock List Name">
+                    <label>
+                        <input type="checkbox" name="is_public"> Public
+                    </label>
+                    <button type="submit">Create</button>
+                </form>
+            </section>
+
+            <section id="review-content" class="content-section" style="display: none;">
+                <h2>Reviews</h2>
+                <form id="create-review-form">
+                    <h3>Create Review</h3>
+                    <input type="text" name="slid" placeholder="Stock List ID" required>
+                    <textarea name="review" placeholder="Write your review..." maxlength="4000" required></textarea>
+                    <button type="submit">Submit Review</button>
+                </form>
+            </section>
+        </section>
+    </main>
+</body>
 </html>
