@@ -67,7 +67,6 @@
 
             <section id="stocklist-content" class="content-section" style="display: none;">
                 <h2>Stock Lists</h2>
-                <button id="get-stocklists">Get Stock Lists</button>
                 <form id="create-stocklist-form">
                     <h3>Create Stock List</h3>
                     <input type="text" name="slname" placeholder="Stock List Name">
@@ -75,6 +74,19 @@
                         <input type="checkbox" name="is_public"> Public
                     </label>
                     <button type="submit">Create</button>
+                </form>
+                <h3>Your Stock Lists</h3>
+                <div id="stocklists-container">
+                    <!-- Stock lists will be dynamically loaded here -->
+                </div>
+                <div id="stocklist-details">
+                    <!-- Selected stock list details will be displayed here -->
+                </div>
+                <div id="stocks-container">
+                    <!-- Stocks in the selected stock list will be displayed here -->
+                </div>
+                <form id="add-stock-form">
+                    <!-- Add stock form will be dynamically loaded here -->
                 </form>
             </section>
 
