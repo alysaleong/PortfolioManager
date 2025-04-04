@@ -153,27 +153,19 @@ router.post('/symbol/:symbol', async (req, res) => {
     try {
         await client.query('BEGIN');
 
-        await client.query(
-            `CREATE VIEW stock_data AS (
-                (SELECT NOW() AS timestamp, curr_val AS price 
-                FROM stocks 
-                WHERE symbol = '${symbol}') 
-                UNION 
-                (SELECT timestamp, close AS price 
-                FROM hist_stock_data 
-                WHERE symbol = '${symbol}')
-            )`
-        );
-
         const output = await client.query(
             `SELECT *
-            FROM stock_data
+            FROM (
+                (SELECT now() AS timestamp, curr_val AS price 
+                FROM stocks 
+                WHERE symbol = $2) 
+                UNION
+                (SELECT timestamp, close AS price 
+                FROM hist_stock_data 
+                WHERE symbol = $2)
+                )
             WHERE timestamp >= $1`,
-            [timestamp]
-        );
-    
-        await client.query(
-            `DROP VIEW stock_data`
+            [timestamp, symbol]
         );
 
         await client.query("COMMIT");
@@ -216,7 +208,7 @@ router.post('/symbol/:symbol/future', async (req, res) => {
     const slope = output.rows.map(row => row.slope)[0];
     const intercept = output.rows.map(row => row.intercept)[0];
 
-    const prediction = slope * Date.parse(timestamp) / 86400000 + intercept;
+    const prediction = slope * Date.parse(timestamp) / 86400000 + intercept; // convert milliseconds to days
     
     res.status(500).json({message: `The predicted stock price for ${symbol} on ${timestamp} is ${prediction}`, "prediction": `${prediction}`});
 });
