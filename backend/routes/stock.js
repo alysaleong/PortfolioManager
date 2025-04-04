@@ -187,6 +187,40 @@ router.post('/symbol/:symbol', async (req, res) => {
     };
 });
 
+// predict future stock performance for the given timestamp
+router.post('/symbol/:symbol/future', async (req, res) => {
+    const symbol = req.params.symbol;
+    const timestamp = req.body.timestamp;
+
+    // check if stock is in historical data
+    const stocks = await pool.query(
+        `SELECT symbol
+        FROM hist_stock_data
+        WHERE symbol = $1`,
+        [symbol]
+    );
+    if (stocks.rows.length === 0) {
+        res.status(400).json({error: "No available data to predict"});
+        return;
+    }
+    
+    const output = await pool.query(
+        `WITH data AS  
+            (SELECT (timestamp - '1970-01-01'::date) AS time, close
+            FROM hist_stock_data
+            WHERE symbol = $1)
+        SELECT regr_slope(close, time) AS slope, regr_intercept(close, time) AS intercept
+        FROM data`,
+        [symbol]
+    );
+    const slope = output.rows.map(row => row.slope)[0];
+    const intercept = output.rows.map(row => row.intercept)[0];
+
+    const prediction = slope * Date.parse(timestamp) / 86400000 + intercept;
+    
+    res.status(500).json({message: `The predicted stock price for ${symbol} on ${timestamp} is ${prediction}`, "prediction": `${prediction}`});
+});
+
 // compute COV of the given stock for the given time interval
 router.post('/symbol/:symbol/cov', async (req, res) => {
     const symbol = req.params.symbol;
@@ -339,7 +373,7 @@ router.post('/symbol/:symbol/beta', async (req, res) => {
     };
 });
 
-// compute the covariance matrix of the given stocks for the given time interval
+// compute the covariance matrix of the given stocks for the given time interval *EDIT THIS
 router.post('/cov', async (req, res) => {
     const symbol1 = req.body.symbol1;
     const symbol2 = req.body.symbol2;
@@ -418,17 +452,3 @@ router.post('/cov', async (req, res) => {
         client.release();
     };
 });
-
-
-// const client = await pool.connect();
-// try {
-//     await client.query('BEGIN');
-
-//     await client.query("COMMIT");
-//     res.status(200).json({message: ``});
-// } catch (error) {
-//     await client.query("ROLLBACK");
-//     res.status(500).json({error: "Insert failed"});
-// } finally {
-//     client.release();
-// };

@@ -135,6 +135,10 @@ router.post('/withdraw', async (req, res) => {
     };
 });
 
+// display bought stocks
+
+// display sold stocks
+
 // buy stock
 router.post('/buy', async (req, res) => {
     const uid = req.session.uid;
@@ -322,15 +326,3 @@ router.post('/sell', async (req, res) => {
     }
 });
 
-// const client = await pool.connect();
-//     try {
-//         await client.query('BEGIN');
-
-//         await client.query("COMMIT");
-//         res.status(200).json({message: ``});
-//     } catch (error) {
-//         await client.query("ROLLBACK");
-//         res.status(500).json({error: "Insert failed"});
-//     } finally {
-//         client.release();
-//     };
