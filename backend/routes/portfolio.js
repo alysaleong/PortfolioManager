@@ -136,6 +136,61 @@ router.post('/withdraw', async (req, res) => {
     };
 });
 
+// transfer cash between portfolios
+router.post('/transfer', async (req, res) => {
+    const uid = req.session.uid;
+    const to = req.body.to;
+    const from = req.body.from;
+    const amount = req.body.amount;
+
+    // check if the given portfolios belong to the user
+    if (!(await usersPortfolio(uid, to)) || !(await usersPortfolio(uid, from))) {
+        res.status(400).json({error: "Invalid portfolio"});
+        return;
+    };
+
+    // check if amount can be deducted from "from" portfolio
+    let from_cash = await pool.query(
+        `SELECT cash
+        FROM portfolios
+        WHERE pid = $1`,
+        [from]
+    );
+    from_cash = from_cash.rows.map(row => row.cash)[0];
+    if (from_cash - amount < 0) {
+        res.status(400).json({error: "Invalid amount"});
+        return;
+    };
+
+    // transfer cash
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+
+        await client.query(
+            `UPDATE portfolios
+            SET cash = (cash - $2)
+            WHERE pid = $1`,
+            [from, amount]
+        );
+
+        await client.query(
+            `UPDATE portfolios
+            SET cash = (cash + $2)
+            WHERE pid = $1`,
+            [to, amount]
+        );
+
+        await client.query("COMMIT");
+        res.status(200).json({message: "Cash successfully transferred"});
+    } catch (error) {
+        await client.query("ROLLBACK");
+        res.status(500).json({error: "Transfer failed"});
+    } finally {
+        client.release();
+    };
+});
+
 // display bought stocks
 router.get('/bought/:pid', async (req, res) => {
     const uid = req.session.uid;
@@ -172,6 +227,34 @@ router.get('/sold/:pid', async (req, res) => {
         `SELECT symbol, timestamp, (quantity * unit_price) AS total_value
         FROM sold
         WHERE pid = $1`,
+        [pid]
+    );
+
+    res.status(500).json(output.rows);
+});
+
+// display present value of portfolio
+router.get('/value/:pid', async (req, res) => {
+    const uid = req.session.uid;
+    const pid = req.params.pid;
+
+    // check if the given portfolio belongs to user
+    if (!(await usersPortfolio(uid, pid))) {
+        res.status(400).json({error: "Invalid portfolio"});
+        return;
+    };
+
+    // get present value of portfolio
+    let output = await pool.query(
+        `WITH present_value AS (
+            SELECT s.symbol, (p.quantity * s.curr_val) AS total_value
+            FROM stocks s JOIN in_port p ON s.symbol = p.symbol
+            WHERE p.pid = $1
+        )
+        (SELECT * FROM present_value)
+        UNION
+        (SELECT 'Portfolio Total' AS symbol, SUM(total_value) AS total_value
+        FROM present_value)`,
         [pid]
     );
 

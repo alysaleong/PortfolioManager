@@ -63,6 +63,10 @@
 #### req: POST http://localhost:4000/api/portfolios/withdraw
 #### res: `{message: `\$${withdrawal} withdrew`}`
 
+### Transfer cash between given portfolios
+#### req: POST http://localhost:4000/api/portfolios/transfer
+#### res: `{message: "Cash successfully transferred"}`
+
 ### Display stocks bought
 #### req: GET http://localhost:4000/api/portfolios/bought/:pid
 #### res: 
@@ -85,6 +89,34 @@
         "symbol": "POO",
         "timestamp": "2025-03-31T04:00:00.000Z",
         "total_value": "420.69"
+    }
+]
+```
+
+### Display present value of portfolio
+#### req: GET http://localhost:4000/api/portfolios/value/:pid
+#### res:
+```
+[
+    {
+        "symbol": "COG",
+        "total_value": "233.70"
+    },
+    {
+        "symbol": "ABC",
+        "total_value": "10364.20"
+    },
+    {
+        "symbol": "VFC",
+        "total_value": "8047.00"
+    },
+    {
+        "symbol": "Portfolio Total",
+        "total_value": "19867.90"
+    },
+    {
+        "symbol": "O",
+        "total_value": "1223.00"
     }
 ]
 ```
