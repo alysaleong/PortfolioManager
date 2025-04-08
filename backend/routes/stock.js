@@ -254,7 +254,7 @@ router.post('/symbol/:symbol/cov', async (req, res) => {
                 GROUP BY symbol`,
                 [symbol, start_date, end_date]
             );
-            cov = cov.rows.map(row => row.cov)[0];
+            cov = Number(cov.rows.map(row => row.cov)[0]);
 
             if (cov == null) {
                 cov = "No data available";
@@ -267,6 +267,11 @@ router.post('/symbol/:symbol/cov', async (req, res) => {
                     [symbol, cov, start_date, end_date]
                 );
             };
+        } else {
+            request.rows = request.rows.map(row => {
+                row.cov = Number(row.cov);
+                return row;
+            });
         };
 
         await client.query("COMMIT");
@@ -318,13 +323,13 @@ router.post('/symbol/:symbol/beta', async (req, res) => {
         await client.query('BEGIN');
 
         // check if requested data is cached
-        const request = await client.query(
+        let request = await client.query(
             `SELECT beta
             FROM beta_cache
             WHERE symbol = $1 AND start_date = $2 AND end_date = $3`,
             [symbol, start_date, end_date]
         );
-
+        
         let output = {};
         let cached = true;
         if (request.rows.length === 0) {
@@ -349,6 +354,11 @@ router.post('/symbol/:symbol/beta', async (req, res) => {
                     [symbol, beta, start_date, end_date]
                 );
             };
+        } else {
+            request.rows = request.rows.map(row => {
+                row.beta = Number(row.beta);
+                return row;
+            });
         };
 
         await client.query("COMMIT");
