@@ -41,13 +41,21 @@ router.get('/pid/:pid', async (req, res) => {
         res.status(400).json({error: "Invalid portfolio"});
         return;
     };
-    
+
+    // get present value of portfolio
     const output = await pool.query(
-        `SELECT stocks.symbol, quantity, quantity * curr_val AS total_value
-        FROM in_port JOIN stocks ON in_port.symbol = stocks.symbol
-        WHERE pid = $1`,
+        `WITH present_value AS (
+            SELECT s.symbol, quantity, (p.quantity * s.curr_val) AS total_value
+            FROM stocks s JOIN in_port p ON s.symbol = p.symbol
+            WHERE p.pid = $1
+        )
+        (SELECT * FROM present_value)
+        UNION
+        (SELECT 'Portfolio Total' AS symbol, SUM(quantity) AS quantity, SUM(total_value) AS total_value
+        FROM present_value)`,
         [pid]
     );
+
     res.status(200).json(output.rows);
 });
 
@@ -227,34 +235,6 @@ router.get('/sold/:pid', async (req, res) => {
         `SELECT symbol, timestamp, (quantity * unit_price) AS total_value
         FROM sold
         WHERE pid = $1`,
-        [pid]
-    );
-
-    res.status(500).json(output.rows);
-});
-
-// display present value of portfolio
-router.get('/value/:pid', async (req, res) => {
-    const uid = req.session.uid;
-    const pid = req.params.pid;
-
-    // check if the given portfolio belongs to user
-    if (!(await usersPortfolio(uid, pid))) {
-        res.status(400).json({error: "Invalid portfolio"});
-        return;
-    };
-
-    // get present value of portfolio
-    let output = await pool.query(
-        `WITH present_value AS (
-            SELECT s.symbol, (p.quantity * s.curr_val) AS total_value
-            FROM stocks s JOIN in_port p ON s.symbol = p.symbol
-            WHERE p.pid = $1
-        )
-        (SELECT * FROM present_value)
-        UNION
-        (SELECT 'Portfolio Total' AS symbol, SUM(total_value) AS total_value
-        FROM present_value)`,
         [pid]
     );
 
