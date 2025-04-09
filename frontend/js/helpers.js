@@ -23,6 +23,16 @@ export async function checkLoginStatus() {
     }
 }
 
+export async function getLoggedInEmail() {
+    try {
+        const response = await sendRequest('/me');
+        return response.email || null;
+    } catch (error) {
+        console.error("Error fetching logged-in email:", error);
+        return null;
+    }
+}
+
 export function populateDropdown(dropdown, options, values) {
     for (let i= 0; i < options.length; i++) {
         const item = options[i];

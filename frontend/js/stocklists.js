@@ -5,15 +5,6 @@ let selectedStockListId = null;
 // load all stock lists
 export async function loadStockLists() {
     const stockListsContainer = document.getElementById('stocklists-container');
-    // const stockListDetailsContainer = document.getElementById('stocklist-details');
-    // const stocksContainer = document.getElementById('stocks-container');
-    // const addStockForm = document.getElementById('add-stock-form');
-
-    // // Clear the container and hide details
-    // stockListsContainer.innerHTML = ''; 
-    // stockListDetailsContainer.style.display = 'none';
-    // stocksContainer.style.display = 'none';
-    // addStockForm.style.display = 'none';
     stockListsContainer.innerHTML = '<h3>Your Stock Lists</h3>'; // clear the list before populating
     const stockLists = await sendRequest('/stocklists');
     stockLists.forEach(stockList => {
@@ -38,6 +29,7 @@ async function selectStockList(slid) {
     const addStockForm = document.getElementById('add-stock-form');
 
     // display stock list details
+    stockListDetailsContainer.style.display = 'block';
     stockListDetailsContainer.innerHTML = `
         <h3>Edit ${stockListDetails.slname}</h3>
         <button id="toggle-public-button">${stockListDetails.public ? 'Make Private' : 'Make Public'}</button>
@@ -48,11 +40,12 @@ async function selectStockList(slid) {
         const newPublicStatus = !stockListDetails.public;
         const result = await sendRequest(`/stocklists/${slid}`, 'PATCH', { is_public: newPublicStatus });
         alert(result.message);
-        await loadStockLists(); // reload stock lists
-        await selectStockList(slid); // reload selected stock list
+        await loadStockLists(); // reload stock lists to reflect changes
+        //await selectStockList(slid); // reload selected stock list to reflect changes
     });
 
     // display stocks in the stock list
+    stocksContainer.style.display = 'block';
     stocksContainer.innerHTML = `<h3>Stocks in ${stockListDetails.slname}</h3>`;
     stockListDetails.stocks.forEach(stock => {
         const stockEl = document.createElement('div');

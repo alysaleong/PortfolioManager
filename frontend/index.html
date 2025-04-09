@@ -15,6 +15,7 @@
 <body>
     <header id="main-header">
         <h1>Portfolio Manager</h1>
+        <div id="user-email" class="user-email"></div> <!-- Added email display -->
     </header>
     <main id="main-container">
         <section id="auth-section" class="section-container">
@@ -74,7 +75,7 @@
                 <div id="stocklist-actions">
                     <form id="create-stocklist-form" class="sub-content-section">
                         <h3>Create Stock List</h3>
-                        <input type="text" name="slname" placeholder="Stock List Name">
+                        <input type="text" name="slname" placeholder="Stock List Name (default: 'My Stock List')">
                         <div class="inline-checkbox-container">
                             <input type="checkbox" name="is_public" id="is_public">
                             <label for="is_public">Public</label>

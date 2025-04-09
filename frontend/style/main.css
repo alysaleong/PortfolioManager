@@ -46,7 +46,7 @@ form input, form button, form textarea, form select {
     width: 100%;
     margin-bottom: 0.5rem;
     padding: 0.5rem;
-    border: 1px solid #ccc;
+    border: 1px solid #c4cfcd;
     border-radius: 4px;
     font-size: 1rem;
 }
@@ -86,20 +86,24 @@ nav {
     background-color: #31b4b2;
 }
 
-#logout-button {
+#logout-button, #toggle-public-button {
     background-color: #31b4b2;
 }
 
 #logout-button:hover {
-    background-color: #3197ab;
+    background-color: #e53935;
+}
+
+#toggle-public-button:hover {
+    background-color: #31b4b2;
 }
 
 /* List Styles */
 #friends-list, #stocklists-container, #stocks-container, #incoming-requests-list, #outgoing-requests-list {
     margin-top: 1rem;
     padding: 1rem;
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
+    background-color: #f4fbfb;
+    border: 1px solid #d0d8d9;
     border-radius: 4px;
 }
 
@@ -108,7 +112,7 @@ nav {
     justify-content: space-between;
     align-items: center;
     padding: 0.5rem;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid #d0d8d9;
 }
 
 /* Friend Request Item Styling */
@@ -118,8 +122,8 @@ nav {
     align-items: center;
     padding: 0.5rem 1rem;
     margin-bottom: 0.5rem;
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
+    background-color: #f4fbfb;
+    border: 1px solid #d0d8d9;
     border-radius: 4px;
 }
 
@@ -135,7 +139,7 @@ nav {
 }
 
 button.remove-friend-button, button.remove-stock-button {
-    background-color: #f44336;
+    background-color: #31b4b2;
     color: white;
     border: none;
     padding: 0.3rem 0.5rem;
@@ -151,8 +155,8 @@ button.remove-friend-button:hover, button.remove-stock-button:hover {
 #stocklist-details {
     margin-top: 1rem;
     padding: 1rem;
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
+    background-color: #f4fbfb;
+    border: 1px solid #d0d8d9;
     border-radius: 4px;
 }
 
@@ -161,7 +165,6 @@ button.remove-friend-button:hover, button.remove-stock-button:hover {
 }
 
 #toggle-public-button {
-    background-color: #2196F3;
     color: white;
     border: none;
     padding: 0.5rem 1rem;
@@ -169,9 +172,6 @@ button.remove-friend-button:hover, button.remove-stock-button:hover {
     cursor: pointer;
 }
 
-#toggle-public-button:hover {
-    background-color: #1e88e5;
-}
 
 /* Stock List Buttons */
 .stocklist-item, .stock-item, .friend-item {
@@ -180,20 +180,23 @@ button.remove-friend-button:hover, button.remove-stock-button:hover {
     align-items: center;
     padding: 0.5rem 1rem;
     margin-bottom: 0.5rem;
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
+    background-color: #f4fbfb;
+    border: 1px solid #d0d8d9;
     border-radius: 4px;
-    cursor: pointer;
     transition: background-color 0.3s ease;
 }
 
-.stocklist-item:hover, .stock-item:hover, .friend-item:hover {
+.stocklist-item {
+    cursor: pointer;
+}
+
+.stocklist-item:hover {
     background-color: #e6f7f5;
 }
 
 .stocklist-name {
     font-size: 1rem;
-    font-weight: bold;
+    font-weight: normal;
     color: #333;
     border: none;
     background: none;
@@ -253,7 +256,7 @@ button.remove-friend-button:hover, button.remove-stock-button:hover {
 
 /* Accept and Reject Buttons */
 .accept-request-button {
-    background-color: #f071b1; /* Green for accept */
+    background-color: #31b4b2; /* Green for accept */
     color: white;
     border: none;
     padding: 0.3rem 0.5rem;
@@ -264,7 +267,7 @@ button.remove-friend-button:hover, button.remove-stock-button:hover {
 }
 
 .accept-request-button:hover {
-    background-color: #c03c7e;
+    background-color: #41a15b;
 }
 
 .reject-request-button {
@@ -278,7 +281,21 @@ button.remove-friend-button:hover, button.remove-stock-button:hover {
 }
 
 .reject-request-button:hover {
-    background-color: #168280;
+    background-color: #e53935;
+}
+
+/* User Email Display */
+.user-email {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 0.9rem;
+    color: #333;
+    background-color: #f9f9f9;
+    padding: 0.5rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Responsive Design */

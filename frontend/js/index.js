@@ -1,4 +1,4 @@
-import { checkLoginStatus } from './helpers.js';
+import { checkLoginStatus, getLoggedInEmail } from './helpers.js';
 import { loadFriends } from './friends.js';
 import { loadIncomingRequest, loadOutgoingRequest } from './requests.js';
 
@@ -11,18 +11,25 @@ export async function updatePage(isLoggedIn = null) {
 
     const authSection = document.getElementById('auth-section');
     const mainContent = document.getElementById('main-content');
+    const userEmailDisplay = document.getElementById('user-email');
 
     // if user is logged in, hide auth section and show main content
     // else show auth section and hide main content
     if (isLoggedIn) {
         authSection.style.display = 'none';
         mainContent.style.display = 'block';
+        const email = await getLoggedInEmail();
+        if (email) {
+            userEmailDisplay.textContent = `Logged in as: ${email}`;
+            userEmailDisplay.style.display = 'block';
+        }
         loadFriends();
         loadIncomingRequest();
         loadOutgoingRequest();
     } else {
         authSection.style.display = 'block';
         mainContent.style.display = 'none';
+        userEmailDisplay.style.display = 'none';
     }
 }
 
