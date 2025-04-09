@@ -1,5 +1,6 @@
 import express from "express";
 import pg from "pg";
+import cors from "cors";
 import session from "express-session";
 import router from "./routes/index.js";
 
@@ -31,6 +32,13 @@ pg.types.setTypeParser(1114, function(stringValue) {
 });
 export { pool };
 
+// cors
+const corsConfig = {
+    origin: true,
+    credentials: true
+};
+app.use(cors(corsConfig));
+
 // set up sessions
 app.use(session({
   secret: process.env.SESSION_SECRET,
@@ -43,6 +51,7 @@ app.use(session({
 
 // middleware to parse json
 app.use(express.json());
+app.use(express.static("../frontend"));
 
 // to display requests in console
 app.use((req, res, next) => {

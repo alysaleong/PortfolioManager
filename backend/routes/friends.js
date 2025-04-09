@@ -1,3 +1,4 @@
+// /api/friends
 import express from 'express';
 import { pool } from '../server.js';
 
@@ -11,20 +12,30 @@ router.get('/', async (req, res) => {
 
     try {
         // get all u2 where u1=uid
-        const u2 = await pool.query(
+        let u2 = await pool.query(
             `SELECT u2, email 
             FROM friends JOIN users ON friends.u2 = users.uid
             WHERE u1 = $1`,
             [uid]
         );
+        u2.rows = u2.rows.map(user => {
+            user.uid = user.u2;
+            delete user.u2;
+            return user;
+        });
 
         // get all u1 where u2=uid
-        const u1 = await pool.query(
+        let u1 = await pool.query(
             `SELECT u1, email 
             FROM friends JOIN users ON friends.u1 = users.uid
             WHERE u2 = $1`,
             [uid]
         );
+        u1.rows = u1.rows.map(user => {
+            user.uid = user.u1;
+            delete user.u1;
+            return user;
+        });
 
         // combine them to get the friends list 
         friends = friends.concat(u1.rows);
@@ -48,7 +59,7 @@ router.delete('/', async (req, res) => {
         // delete the friendship
         const friendship = await client.query(
             `DELETE FROM friends 
-            WHERE (u1 = $1 AND u2 = $2) OR (u1 = $2 and u1 = $1) RETURNING *`,
+            WHERE (u1 = $1 AND u2 = $2) OR (u1 = $2 AND u2 = $1) RETURNING *`,
             [uid, friend]
         );
         // if they weren't your friend 
@@ -195,7 +206,22 @@ router.get('/requests/outgoing', async (req, res) => {
 // send a request
 router.post('/requests', async (req, res) => {
     const uid = req.session.uid;
-    const requestee = req.body.requestee;
+    let requestee = req.body.requestee || null;
+    // if not id, get email and convert to uid
+    if (!requestee) {
+        const email = req.body.email;
+        // convert email to uid
+        requestee = await pool.query(
+            `SELECT uid FROM users WHERE email = $1`,
+            [email]
+        );
+        // if the email doesn't exist, return error
+        if (requestee.rows.length === 0) {
+            return res.status(400).json({error: "No such user" });
+        }
+        requestee = requestee.rows[0].uid;
+    }
+
 
     const client = await pool.connect();
     try {
@@ -255,7 +281,7 @@ router.post('/requests', async (req, res) => {
         // check if they requested you
         const they_requested = await client.query(
             `SELECT * FROM requested 
-            WHERE (requester = $1 AND requestee = $2)`,
+            WHERE (requester = $1 AND requestee = $2) AND rejected_at IS NULL`,
             [requestee, uid]
         );
         if (they_requested.rows.length > 0) {

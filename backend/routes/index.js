@@ -1,9 +1,13 @@
+// /api
 import express from 'express';
 import bcrypt from 'bcrypt';
 import { pool } from '../server.js'
+import usersRouter from './users.js';
 import portfoliosRouter from './portfolio.js';
 import friendsRouter from './friends.js';
 import stocksRouter from './stock.js';
+import stockListsRouter from './stocklists.js';
+import reviewsRouter from './reviews.js';
 import { isAuth } from '../middleware/authMiddleware.js'
 
 const router = express.Router();
@@ -128,8 +132,11 @@ router.get('/logout', async (req, res) => {
 
 
 // ROUTES
+router.use('/users', isAuth, usersRouter);
 router.use('/portfolios', isAuth, portfoliosRouter);
 router.use('/friends', isAuth, friendsRouter);
 router.use('/stocks', isAuth, stocksRouter);
+router.use('/stocklists', isAuth, stockListsRouter);
+router.use('/reviews', isAuth, reviewsRouter);
 
 export default router;

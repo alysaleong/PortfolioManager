@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Manager</title>
+    <script type="module" src="./js/index.js" defer></script>
+    <script type="module" src="./js/auth.js" defer></script>
+    <script type="module" src="./js/friends.js" defer></script>
+    <script type="module" src="./js/stocklists.js" defer></script>
+    <script type="module" src="./js/reviews.js" defer></script>
+    <script type="module" src="./js/requests.js" defer></script>
+    <link href="style/main.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+    <header id="main-header">
+        <h1>Portfolio Manager</h1>
+        <div id="user-email" class="user-email"></div> <!-- Added email display -->
+    </header>
+    <main id="main-container">
+        <section id="auth-section" class="section-container">
+            <h2>Authentication</h2>
+            <div id="auth-forms">
+                <form id="register-form" class="auth-form">
+                    <h3>Register</h3>
+                    <input type="email" name="email" placeholder="Email" required>
+                    <input type="password" name="password" placeholder="Password" required>
+                    <input type="number" name="cash" placeholder="Initial Cash (optional)">
+                    <button type="submit">Register</button>
+                </form>
+                <form id="login-form" class="auth-form">
+                    <h3>Login</h3>
+                    <input type="email" name="email" placeholder="Email" required>
+                    <input type="password" name="password" placeholder="Password" required>
+                    <button type="submit">Login</button>
+                </form>
+            </div>
+        </section>
+
+        <section id="main-content" class="section-container" style="display: none;">
+            <nav id="main-nav">
+                <button class="nav-button" id="friends-tab" data-target="friend-content">Friends</button>
+                <button class="nav-button" id="requests-tab" data-target="request-content">Requests</button>
+                <button class="nav-button" id="stocklists-tab" data-target="stocklist-content">Stock Lists</button>
+                <button class="nav-button" id="reviews-tab" data-target="review-content">Reviews</button>
+                <button id="logout-button" class="nav-button logout-button">Logout</button>
+            </nav>
+
+            <section id="friend-content" class="content-section" style="display: none;">
+                <h2>Friends</h2>
+                <div id="friend-actions">
+                    <form id="add-friend-form" class="sub-content-section">
+                        <h3>Send Friend Request</h3>
+                        <input type="text" name="email" placeholder="User's Email" required>
+                        <button type="submit">Send Request</button>
+                    </form>
+                </div>
+                <div id="friends-list" class="sub-content-section">
+                    <h3>Your Friends</h3>
+                </div>
+            </section>
+
+            <section id="request-content" class="content-section" style="display: none;">
+                <h2>Requests</h2>
+                <div id="incoming-requests-list" class="sub-content-section">
+                    <h3>Incoming Requests</h3>
+                </div>
+                <div id="outgoing-requests-list" class="sub-content-section">
+                    <h3>Outgoing Requests</h3>
+                </div>
+            </section>
+
+            <section id="stocklist-content" class="content-section" style="display: none;">
+                <h2>Stock Lists</h2>
+                <div id="stocklist-actions">
+                    <form id="create-stocklist-form" class="sub-content-section">
+                        <h3>Create Stock List</h3>
+                        <input type="text" name="slname" placeholder="Stock List Name (default: 'My Stock List')">
+                        <div class="inline-checkbox-container">
+                            <input type="checkbox" name="is_public" id="is_public">
+                            <label for="is_public">Public</label>
+                        </div>
+                        <button type="submit">Create</button>
+                    </form>
+                </div>
+                <div id="stocklists-container" class="sub-content-section">
+                    <h3>Your Stock Lists</h3>
+                </div>
+                <div id="stocklist-details" class="sub-content-section" style="display: none;">
+                    <h3>Stock List Details</h3>
+                </div>
+                <div id="stocks-container">
+                    <div id="stocks-in-list-container" class="sub-content-section" stype="display: none;">
+                        <!-- <h3>Stocks in Selected List</h3> -->
+                    </div>
+                    <form id="add-stock-form" class="sub-content-section" style="display: none;">
+                        <h3>Add Stock</h3>
+                        <input type="text" name="symbol" placeholder="Stock Symbol" required>
+                        <input type="number" name="quantity" placeholder="Quantity" required>
+                        <button type="submit">Add Stock</button>
+                    </form>
+                </div>
+            </section>
+
+            <section id="review-content" class="content-section" style="display: none;">
+                <h2>Reviews</h2>
+                <form id="create-review-form" class="sub-content-section">
+                    <h3>Create Review</h3>
+                    <input type="text" name="slid" placeholder="Stock List ID" required>
+                    <textarea name="review" placeholder="Write your review..." maxlength="4000" required></textarea>
+                    <button type="submit">Submit Review</button>
+                </form>
+            </section>
+        </section>
+    </main>
+</body>
+</html>
