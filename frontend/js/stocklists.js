@@ -41,7 +41,7 @@ async function selectStockList(slid) {
         const result = await sendRequest(`/stocklists/${slid}`, 'PATCH', { is_public: newPublicStatus });
         alert(result.message);
         await loadStockLists(); // reload stock lists to reflect changes
-        //await selectStockList(slid); // reload selected stock list to reflect changes
+        await selectStockList(slid); // reload selected stock list to reflect changes
     });
 
     // display stocks in the stock list

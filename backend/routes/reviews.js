@@ -114,7 +114,7 @@ router.post('/:slid', async (req, res) => {
     const review = req.body.review;
 
     // check if this stocklist is public
-    if (!await is_stocklist_public(slid)) {
+    if (!await can_review(uid, slid)) {
         return res.status(400).json({ error: "Invalid stock list id or this stock list is not public" });
     }
     // check if the review is less than 4000 characters

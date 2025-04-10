@@ -20,12 +20,19 @@ export async function can_review(uid, slid) {
     if (stocklist.rows.length === 0) return false;
     const owner = stocklist.rows[0].uid;
     const is_public = stocklist.rows[0].public;
+    console.log(`Owner: ${owner}, Public: ${is_public}`);
 
     // owner cannot review their own stocklist
-    if (owner === uid) return false;
+    if (owner === uid) { 
+        //console.log("Owner cannot review their own stocklist");
+        return true;
+    }
 
     // if the stocklist is public, return true
-    if (is_public) return true;
+    if (is_public) {
+        console.log("Stocklist is public, can review");
+        return true;
+    }
 
     // check if the friend is reviewing the stocklist
     const is_reviewing = await pool.query(

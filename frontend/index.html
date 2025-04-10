@@ -104,9 +104,20 @@
 
             <section id="review-content" class="content-section" style="display: none;">
                 <h2>Reviews</h2>
-                <form id="create-review-form" class="sub-content-section">
-                    <h3>Create Review</h3>
-                    <input type="text" name="slid" placeholder="Stock List ID" required>
+                <div id="review-actions" class="sub-content-section">
+                    <button id="toggle-public-lists" class="nav-button">Show Public Lists</button>
+                    <button id="toggle-reviewing-lists" class="nav-button">Show Lists I'm Reviewing</button>
+                </div>
+                <div id="public-lists-container" class="sub-content-section" style="display: none;">
+                    <h3>Public Stock Lists</h3>
+                </div>
+                <div id="reviewing-lists-container" class="sub-content-section" style="display: none;">
+                    <h3>Lists I'm Reviewing</h3>
+                </div>
+                <div id="review-stocks-container" class="sub-content-section" style="display: block;">
+                </div>
+                <form id="write-review-form" class="sub-content-section" style="display: none;">
+                    <h3>Write a Review</h3>
                     <textarea name="review" placeholder="Write your review..." maxlength="4000" required></textarea>
                     <button type="submit">Submit Review</button>
                 </form>
