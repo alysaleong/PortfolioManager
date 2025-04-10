@@ -12,7 +12,7 @@ export async function loadStockLists() {
         stockListEl.classList.add('stocklist-item');
         stockListEl.setAttribute('data-slid', stockList.slid);
         stockListEl.innerHTML = `
-            <button class="stocklist-name">${stockList.slname}</button>
+            <button class="stocklist-name">${stockList.slid}: ${stockList.slname}</button>
             <div class="stocklist-public">${stockList.public ? 'Public' : 'Private'}</div>
         `;
         stockListEl.addEventListener('click', () => selectStockList(stockList.slid));

@@ -12,7 +12,7 @@ export async function loadPortfolios() {
         portfolioEl.classList.add('portfolio-item');
         portfolioEl.setAttribute('data-pid', portfolio.pid);
         portfolioEl.innerHTML = `
-            <button class="portfolio-name">${portfolio.pname}</button>
+            <button class="portfolio-name">${portfolio.pid}: ${portfolio.pname}</button>
             <div class="portfolio-cash">Cash: $${portfolio.cash}</div>
         `;
         portfoliosContainer.appendChild(portfolioEl);
@@ -74,14 +74,25 @@ async function selectPortfolio(pid) {
         });
     });
 
-    // Show the add stock form
+    // Show the add stock form with both "Buy Stock" and "Sell Stock" buttons
     addStockForm.style.display = 'block';
     addStockForm.innerHTML = `
-        <h4>Add Stock to ${portfolioDetails.pname}</h4>
+        <h4>Manage Stocks in ${portfolioDetails.pname}</h4>
         <input type="text" name="symbol" placeholder="Stock Symbol" required>
         <input type="number" name="quantity" placeholder="Quantity" required>
-        <button type="submit">Add Stock</button>
+        <button type="submit" id="buy-stock-button">Buy Stock</button>
+        <button type="button" id="sell-stock-button">Sell Stock</button>
     `;
+
+    // Add event listener for the "Sell Stock" button
+    document.getElementById('sell-stock-button').addEventListener('click', async () => {
+        const formData = new FormData(addStockForm);
+        const body = Object.fromEntries(formData.entries());
+        body.pid = selectedPortfolioId; // Add portfolio ID to the request body
+        const result = await sendRequest(`/portfolios/sell`, 'POST', body);
+        alert(JSON.stringify(result.message || result.error));
+        await selectPortfolio(selectedPortfolioId); // Reload selected portfolio
+    });
 }
 
 // Add a stock to the selected portfolio
