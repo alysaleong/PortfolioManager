@@ -10,6 +10,7 @@
     <script type="module" src="./js/stocklists.js" defer></script>
     <script type="module" src="./js/reviews.js" defer></script>
     <script type="module" src="./js/requests.js" defer></script>
+    <script type="module" src="./js/portfolios.js" defer></script>
     <link href="style/main.css" rel="stylesheet" type="text/css">
 </head>
 <body>
@@ -43,6 +44,7 @@
                 <button class="nav-button" id="requests-tab" data-target="request-content">Requests</button>
                 <button class="nav-button" id="stocklists-tab" data-target="stocklist-content">Stock Lists</button>
                 <button class="nav-button" id="reviews-tab" data-target="review-content">Reviews</button>
+                <button class="nav-button" id="portfolio-tab" data-target="portfolio-content">Portfolio</button>
                 <button id="logout-button" class="nav-button logout-button">Logout</button>
             </nav>
 
@@ -120,6 +122,33 @@
                     <h3>Write a Review</h3>
                     <textarea name="review" placeholder="Write your review..." maxlength="4000" required></textarea>
                     <button type="submit">Submit Review</button>
+                </form>
+            </section>
+
+            <section id="portfolio-content" class="content-section" style="display: none;">
+                <h2>Portfolio</h2>
+                <div id="portfolio-actions">
+                    <form id="add-portfolio-form" class="sub-content-section">
+                        <h3>Create Portfolio</h3>
+                        <input type="text" name="pname" placeholder="Portfolio Name (default: 'My Portfolio')">
+                        <input type="number" name="cash" placeholder="Initial Cash (optional)">
+                        <button type="submit">Create</button>
+                    </form>
+                </div>
+                <div id="portfolios-container" class="sub-content-section">
+                    <h3>Your Portfolios</h3>
+                </div>
+                <div id="portfolio-details" class="sub-content-section" style="display: none;">
+                    <h3>Portfolio Details</h3>
+                </div>
+                <div id="portfolio-stocks-container" class="sub-content-section" style="display: none;">
+                    <!-- <h3>Stocks in Selected Portfolio</h3> -->
+                </div>
+                <form id="add-stock-to-portfolio-form" class="sub-content-section" style="display: none;">
+                    <h3>Add Stock</h3>
+                    <input type="text" name="symbol" placeholder="Stock Symbol" required>
+                    <input type="number" name="quantity" placeholder="Quantity" required>
+                    <button type="submit">Add Stock</button>
                 </form>
             </section>
         </section>

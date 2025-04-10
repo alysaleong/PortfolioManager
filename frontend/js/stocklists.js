@@ -39,7 +39,7 @@ async function selectStockList(slid) {
     document.getElementById('toggle-public-button').addEventListener('click', async () => {
         const newPublicStatus = !stockListDetails.public;
         const result = await sendRequest(`/stocklists/${slid}`, 'PATCH', { is_public: newPublicStatus });
-        alert(result.message);
+        alert(JSON.stringify(result.message || result.error));
         await loadStockLists(); // reload stock lists to reflect changes
         await selectStockList(slid); // reload selected stock list to reflect changes
     });
@@ -65,7 +65,7 @@ async function selectStockList(slid) {
         button.addEventListener('click', async (e) => {
             const symbol = e.target.dataset.symbol;
             const result = await sendRequest(`/stocklists/${slid}/stocks`, 'DELETE', { symbol });
-            alert(result.message);
+            alert(JSON.stringify(result.message || result.error));
             await selectStockList(slid); // reload selected stock list
         });
     });
@@ -90,7 +90,7 @@ document.getElementById('add-stock-form').addEventListener('submit', async (e) =
     const formData = new FormData(e.target);
     const body = Object.fromEntries(formData.entries());
     const result = await sendRequest(`/stocklists/${selectedStockListId}/stocks`, 'POST', body);
-    alert(result.message);
+    alert(JSON.stringify(result.message || result.error));
     await selectStockList(selectedStockListId); // Reload selected stock list
 });
 
@@ -100,7 +100,7 @@ document.getElementById('create-stocklist-form').addEventListener('submit', asyn
     const formData = new FormData(e.target);
     const body = Object.fromEntries(formData.entries());
     const result = await sendRequest('/stocklists', 'POST', body);
-    alert(result.message);
+    alert(JSON.stringify(result.message || result.error));
     await loadStockLists(); // reload stock lists
 });
 

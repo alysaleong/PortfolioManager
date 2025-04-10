@@ -8,7 +8,7 @@ export default router;
 // create a portfolio
 router.post('/', async (req, res) => {
     const uid = req.session.uid;
-    const cash = req.body.cash;
+    const cash = req.body.cash || 0;
     const pname = req.body.pname || 'My Portfolio';
     await pool.query(
         `INSERT INTO portfolios (uid, cash, pname) VALUES ($1, $2, $3)`,
@@ -21,7 +21,7 @@ router.post('/', async (req, res) => {
 router.get('/', async (req, res) => {
     const uid = req.session.uid;
     const output = await pool.query(
-        `SELECT pid, pname
+        `SELECT pid, pname, cash
         FROM portfolios
         WHERE uid = $1`,
         [uid]
@@ -47,7 +47,27 @@ router.get('/:pid', async (req, res) => {
         WHERE pid = $1`,
         [pid]
     );
-    res.status(200).json(output.rows);
+
+    // get name of portfolio
+    const portfolio = await pool.query(
+        `SELECT pname, cash
+        FROM portfolios
+        WHERE pid = $1`,
+        [pid]
+    );
+    const pname = portfolio.rows[0].pname;
+    const cash = portfolio.rows[0].cash;
+    
+    const result = {
+        uid: uid,
+        pid: pid,
+        cash: cash,
+        pname: pname,
+        stocks: output.rows
+
+    }
+
+    res.status(200).json(result);
 });
 
 // deposit money into cash account
@@ -144,8 +164,6 @@ router.post('/buy', async (req, res) => {
     console.log(pid);
     
     // check if the given portfolio belongs to user
-    const poo = await usersPortfolio(uid, pid);
-    console.log(poo);
     if (!(await usersPortfolio(uid, pid))) {
         res.status(400).json({error: "Invalid portfolio"});
         return;

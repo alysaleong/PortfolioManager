@@ -149,16 +149,7 @@ document.getElementById('write-review-form').addEventListener('submit', async (e
     const formData = new FormData(e.target);
     const body = Object.fromEntries(formData.entries());
     const result = await sendRequest(`/reviews/${selectedStockListId}`, 'POST', body);
-    alert(JSON.stringify(result));
+    alert(JSON.stringify(result.message || result.error));
     document.getElementById('write-review-form').style.display = 'none';
     document.getElementById('review-stocks-container').style.display = 'none'; // Hide stocks after submission
-});
-
-// create review
-document.getElementById('create-review-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const body = Object.fromEntries(formData.entries());
-    const result = await sendRequest('/reviews', 'POST', body);
-    alert(JSON.stringify(result));
 });
