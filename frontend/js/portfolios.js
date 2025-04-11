@@ -124,7 +124,7 @@ async function selectPortfolio(pid) {
         const body = Object.fromEntries(formData.entries());
         body.pid = selectedPortfolioId; // Add portfolio ID to the request body
         const result = await sendRequest(`/portfolios/sell`, 'POST', body);
-        alert(JSON.stringify(result.message || result.error));
+        alert(result.message || result.error);
         await selectPortfolio(selectedPortfolioId); // Reload selected portfolio
     });
 
@@ -170,7 +170,7 @@ async function selectPortfolio(pid) {
         const body = Object.fromEntries(formData.entries());
         body.pid = selectedPortfolioId;
         const result = await sendRequest('/portfolios/deposit', 'POST', body);
-        alert(JSON.stringify(result.message || result.error));
+        alert(result.message || result.error);
         await updateCashDisplay(); // Update cash display
     });
 
@@ -180,7 +180,7 @@ async function selectPortfolio(pid) {
         const body = Object.fromEntries(formData.entries());
         body.pid = selectedPortfolioId;
         const result = await sendRequest('/portfolios/withdraw', 'POST', body);
-        alert(JSON.stringify(result.message || result.error));
+        alert(result.message || result.error);
         await updateCashDisplay(); // Update cash display
     });
 
@@ -190,7 +190,7 @@ async function selectPortfolio(pid) {
         const body = Object.fromEntries(formData.entries());
         body.from = selectedPortfolioId;
         const result = await sendRequest('/portfolios/transfer', 'POST', body);
-        alert(JSON.stringify(result.message || result.error));
+        alert(result.message || result.error);
         await updateCashDisplay(); // Update cash display
     });
 
@@ -331,7 +331,7 @@ document.getElementById('add-stock-to-portfolio-form').addEventListener('submit'
     const body = Object.fromEntries(formData.entries());
     body.pid = selectedPortfolioId; // Add portfolio ID to the request body
     const result = await sendRequest(`/portfolios/buy`, 'POST', body);
-    alert(JSON.stringify(result.message || result.error));
+    alert(result.message || result.error);
     await selectPortfolio(selectedPortfolioId); // Reload selected portfolio
 });
 
@@ -349,7 +349,7 @@ document.getElementById('add-portfolio-form').addEventListener('submit', async (
     }
 
     const result = await sendRequest('/portfolios', 'POST', body);
-    alert(JSON.stringify(result.message || result.error));
+    alert(result.message || result.error);
     await loadPortfolios(); // Reload portfolios
     if (result.pid) {
         await selectPortfolio(result.pid); // Automatically select the newly created portfolio

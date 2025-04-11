@@ -25,7 +25,7 @@ export async function loadFriends() {
             const uid = e.target.dataset.uid;
             console.log(`Removing friend with UID: ${uid}`);
             const result = await sendRequest('/friends', 'DELETE', { friend: uid });
-            alert(JSON.stringify(result.message || result.error));
+            alert(result.message || result.error);
             await loadFriends(); // reload friends list after removal
         });
     });
@@ -68,7 +68,7 @@ document.getElementById('add-friend-form').addEventListener('submit', async (e) 
     const formData = new FormData(e.target);
     const body = Object.fromEntries(formData.entries());
     const result = await sendRequest('/friends/requests', 'POST', body);
-    alert(JSON.stringify(result.message || result.error));
+    alert(result.message || result.error);
     await loadFriends(); // reload friends list after adding
 });
 
@@ -78,5 +78,5 @@ document.getElementById('invite-friend-form').addEventListener('submit', async (
     const formData = new FormData(e.target);
     const body = Object.fromEntries(formData.entries());
     const result = await sendRequest(`/reviews/${body.slid}/invite`, 'POST', { friend: body.friend });
-    alert(JSON.stringify(result.message || result.error));
+    alert(result.message || result.error);
 });

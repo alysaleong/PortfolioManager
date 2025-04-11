@@ -27,7 +27,7 @@ export async function loadIncomingRequest() {
             const uid = e.target.dataset.uid;
             console.log(`Accepting request from UID: ${uid}`);
             const result = await sendRequest('/friends/requests/accept', 'POST', { requester: uid });
-            alert(JSON.stringify(result.message || result.error));
+            alert(result.message || result.error);
             await loadIncomingRequest(); // reload incoming requests list after accepting
         });
     });
@@ -38,7 +38,7 @@ export async function loadIncomingRequest() {
             const uid = e.target.dataset.uid;
             console.log(`Rejecting request from UID: ${uid}`);
             const result = await sendRequest('/friends/requests/reject', 'POST', { requester: uid });
-            alert(JSON.stringify(result.message || result.error));
+            alert(result.message || result.error);
             await loadIncomingRequest(); // reload incoming requests list after rejecting
         });
     });
