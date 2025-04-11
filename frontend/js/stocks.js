@@ -26,8 +26,10 @@ document.getElementById('view-stock-form').addEventListener('submit', async (e) 
     e.preventDefault();
     const formData = new FormData(e.target);
     const symbol = formData.get('symbol');
-    const startDate = formData.get('start-date');
-    const endDate = formData.get('end-date');
+    const startDate = new Date(formData.get('start-date')).toISOString(); // Convert to UTC
+    const endDate = new Date(formData.get('end-date'));
+    endDate.setDate(endDate.getDate() + 1); // Add one day to include the end date
+    const endDateUTC = endDate.toISOString(); // Convert to UTC
 
     try {
         selectedStockSymbol = symbol;
@@ -35,8 +37,8 @@ document.getElementById('view-stock-form').addEventListener('submit', async (e) 
 
         // Filter details within the specified date range
         const filteredDetails = stockDetails.filter(data => {
-            const date = new Date(data.timestamp);
-            return date >= new Date(startDate) && date <= new Date(endDate);
+            const date = new Date(data.timestamp).toISOString();
+            return date >= startDate && date < endDateUTC;
         });
 
         // Sort details by date
@@ -110,8 +112,6 @@ function plotStockPerformance(details) {
     if (stockChart) {
         stockChart.destroy();
     }
-
-    console.log(labels[-1], prices[-1]);
 
     // Create a new Chart.js instance
     stockChart = new Chart(ctx, {
