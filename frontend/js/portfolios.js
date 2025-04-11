@@ -42,6 +42,7 @@ async function selectPortfolio(pid) {
     const portfolioStatsContainer = document.getElementById('portfolio-stats-container');
     const addStockForm = document.getElementById('add-stock-to-portfolio-form');
     const portfolioActionsContainer = document.getElementById('portfolio-actions-container');
+    const portfolioHistoryContainer = document.getElementById('portfolio-history-container');
 
     // Ensure all relevant sections are visible
     portfolioDetailsContainer.style.display = 'block';
@@ -49,6 +50,7 @@ async function selectPortfolio(pid) {
     portfolioStatsContainer.style.display = 'block';
     addStockForm.style.display = 'block';
     portfolioActionsContainer.style.display = 'block';
+    portfolioHistoryContainer.style.display = 'block';
 
     // Extract "Portfolio Total" data and filter it out from the stocks list
     const portfolioTotal = portfolioDetails.stocks.find(stock => stock.symbol === "Portfolio Total");
@@ -191,7 +193,64 @@ async function selectPortfolio(pid) {
         alert(JSON.stringify(result.message || result.error));
         await updateCashDisplay(); // Update cash display
     });
+
+    // Load and display bought history by default
+    await loadPortfolioHistory(pid, 'bought');
 }
+
+// Load portfolio transaction history
+async function loadPortfolioHistory(pid, type = 'bought') {
+    const portfolioHistoryContainer = document.getElementById('portfolio-history');
+    portfolioHistoryContainer.innerHTML = '<h4>Loading transaction history...</h4>';
+
+    try {
+        const endpoint = type === 'bought' ? `/portfolios/bought/${pid}` : `/portfolios/sold/${pid}`;
+        const transactions = await sendRequest(endpoint);
+
+        let historyHTML = `
+            <table border="1" style="width: 100%; border-collapse: collapse; text-align: center;">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Symbol</th>
+                        <th>Date</th>
+                        <th>Total Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        transactions.forEach(transaction => {
+            historyHTML += `
+                <tr>
+                    <td>${type === 'bought' ? 'Buy' : 'Sell'}</td>
+                    <td>${transaction.symbol}</td>
+                    <td>${new Date(transaction.timestamp).toLocaleDateString()}</td>
+                    <td>$${parseFloat(transaction.total_value).toFixed(2)}</td>
+                </tr>
+            `;
+        });
+
+        historyHTML += '</tbody></table>';
+        portfolioHistoryContainer.innerHTML = historyHTML;
+    } catch (error) {
+        console.error(`Error loading ${type} history:`, error);
+        portfolioHistoryContainer.innerHTML = `<div>Error loading ${type} history.</div>`;
+    }
+}
+
+// Add event listeners for history buttons
+document.getElementById('bought-history-button').addEventListener('click', async () => {
+    if (selectedPortfolioId) {
+        await loadPortfolioHistory(selectedPortfolioId, 'bought');
+    }
+});
+
+document.getElementById('sold-history-button').addEventListener('click', async () => {
+    if (selectedPortfolioId) {
+        await loadPortfolioHistory(selectedPortfolioId, 'sold');
+    }
+});
 
 // Display portfolio statistics
 async function displayPortfolioStats(stocks, container, startDate, endDate) {
