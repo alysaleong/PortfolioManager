@@ -222,7 +222,7 @@ router.post('/symbol/:symbol/future', async (req, res) => {
         prediction.push({"timestamp": time, "price": value});
     };
     
-    res.status(500).json(prediction);
+    res.status(200).json(prediction);
 });
 
 // compute COV of the given stock for the given time interval
