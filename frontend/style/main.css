@@ -325,7 +325,7 @@ button.remove-friend-button:hover, button.remove-stock-button:hover {
     width: 100%;
 }
 
-.portfolio-cash {
+#portfolio-list-cash {
     font-size: 0.9rem;
     color: #666;
     text-align: right; /* Right-align the cash value */

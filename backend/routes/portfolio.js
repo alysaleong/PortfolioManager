@@ -32,7 +32,7 @@ router.get('/', async (req, res) => {
 });
 
 // display stock holdings of a particular portfolio
-router.get('/pid/:pid', async (req, res) => {
+router.get('/:pid', async (req, res) => {
     const uid = req.session.uid;
     const pid = req.params.pid;
     
@@ -114,6 +114,27 @@ router.post('/deposit', async (req, res) => {
     } finally {
         client.release();
     };
+});
+
+// get cash balance of portfolio
+router.get('/:pid/cash', async (req, res) => {
+    const uid = req.session.uid;
+    const pid = req.params.pid;
+
+    // check if the given portfolio belongs to user
+    if (!(await usersPortfolio(uid, pid))) {
+        res.status(400).json({error: "Invalid portfolio"});
+        return;
+    };
+
+    const output = await pool.query(
+        `SELECT cash
+        FROM portfolios
+        WHERE pid = $1`,
+        [pid]
+    );
+    const cash = output.rows[0].cash;
+    res.status(200).json({cash: cash});
 });
 
 // withdraw money out of cash account

@@ -13,7 +13,7 @@ export async function loadPortfolios() {
         portfolioEl.setAttribute('data-pid', portfolio.pid);
         portfolioEl.innerHTML = `
             <button class="portfolio-name">${portfolio.pid}: ${portfolio.pname}</button>
-            <div class="portfolio-cash">Cash: $${portfolio.cash}</div>
+            <div id="portfolio-list-cash">Cash: $${portfolio.cash}</div>
         `;
         portfoliosContainer.appendChild(portfolioEl);
     });
@@ -40,42 +40,39 @@ async function selectPortfolio(pid) {
     const portfolioDetailsContainer = document.getElementById('portfolio-details');
     const portfolioStocksContainer = document.getElementById('portfolio-stocks-container');
     const addStockForm = document.getElementById('add-stock-to-portfolio-form');
+    const portfolioActionsContainer = document.getElementById('portfolio-actions-container');
+
+    // Extract "Portfolio Total" data and filter it out from the stocks list
+    const portfolioTotal = portfolioDetails.stocks.find(stock => stock.symbol === "Portfolio Total");
+    const stocks = portfolioDetails.stocks.filter(stock => stock.symbol !== "Portfolio Total");
 
     // Display portfolio details
     portfolioDetailsContainer.style.display = 'block';
     portfolioDetailsContainer.innerHTML = `
         <h3>${portfolioDetails.pname}</h3>
-        <div>Cash: $${portfolioDetails.cash}</div>
+        <div id="portfolio-cash">Cash: $${portfolioDetails.cash}</div>
+        <div>Total Quantity: ${portfolioTotal.quantity || 0}</div>
+        <div>Total Value: $${portfolioTotal.total_value || 0}</div>
     `;
 
     // Display stocks in the portfolio
     portfolioStocksContainer.style.display = 'block';
     portfolioStocksContainer.innerHTML = `<h3>Stocks in ${portfolioDetails.pname}</h3>`;
-    portfolioDetails.stocks.forEach(stock => {
+    stocks.forEach(stock => {
         const stockEl = document.createElement('div');
         stockEl.classList.add('stock-item');
+        stockEl.style.display = 'flex';
+        stockEl.style.justifyContent = 'space-between';
         stockEl.innerHTML = `
             <div class="stock-symbol">${stock.symbol}</div>
             <div class="stock-quantity">Quantity: ${stock.quantity}</div>
             <div class="stock-value">Value: $${stock.total_value}</div>
-            <button class="remove-stock-button" data-symbol="${stock.symbol}">Remove</button>
         `;
         portfolioStocksContainer.appendChild(stockEl);
     });
 
-    // Add event listeners to remove stock buttons
-    const removeButtons = document.querySelectorAll('.remove-stock-button');
-    removeButtons.forEach(button => {
-        button.addEventListener('click', async (e) => {
-            const symbol = e.target.dataset.symbol;
-            const result = await sendRequest(`/portfolios/${pid}/stocks`, 'DELETE', { symbol });
-            alert(JSON.stringify(result.message || result.error));
-            await selectPortfolio(pid); // Reload selected portfolio
-        });
-    });
-
-    // Show the add stock form with both "Buy Stock" and "Sell Stock" buttons
-    addStockForm.style.display = 'block';
+    // Show the add stock form
+    addStockForm.style.display = 'block'; // Ensure the form is visible
     addStockForm.innerHTML = `
         <h4>Manage Stocks in ${portfolioDetails.pname}</h4>
         <input type="text" name="symbol" placeholder="Stock Symbol" required>
@@ -93,6 +90,89 @@ async function selectPortfolio(pid) {
         alert(JSON.stringify(result.message || result.error));
         await selectPortfolio(selectedPortfolioId); // Reload selected portfolio
     });
+
+    // Show deposit, withdraw, and transfer forms
+    portfolioActionsContainer.style.display = 'block';
+    portfolioActionsContainer.innerHTML = `
+        <form id="deposit-form">
+            <h4>Deposit Money</h4>
+            <input type="number" name="deposit" placeholder="Amount" required>
+            <button type="submit">Deposit</button>
+        </form>
+        <form id="withdraw-form">
+            <h4>Withdraw Money</h4>
+            <input type="number" name="withdrawal" placeholder="Amount" required>
+            <button type="submit">Withdraw</button>
+        </form>
+        <form id="transfer-form">
+            <h4>Transfer Money</h4>
+            <input type="number" name="amount" placeholder="Amount" required>
+            <select name="to" id="transfer-to-portfolio">
+                <option value="" disabled selected>Select Portfolio</option>
+            </select>
+            <button type="submit">Transfer</button>
+        </form>
+    `;
+
+    // Populate transfer portfolio dropdown
+    const transferDropdown = document.getElementById('transfer-to-portfolio');
+    const portfolios = await sendRequest('/portfolios');
+    portfolios.forEach(portfolio => {
+        if (portfolio.pid !== selectedPortfolioId) {
+            const option = document.createElement('option');
+            option.value = portfolio.pid;
+            option.textContent = `${portfolio.pid}: ${portfolio.pname}`;
+            transferDropdown.appendChild(option);
+        }
+    });
+
+    // Add event listeners for deposit, withdraw, and transfer forms
+    document.getElementById('deposit-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const body = Object.fromEntries(formData.entries());
+        body.pid = selectedPortfolioId;
+        const result = await sendRequest('/portfolios/deposit', 'POST', body);
+        alert(JSON.stringify(result.message || result.error));
+        await updateCashDisplay(); // Update cash display
+    });
+
+    document.getElementById('withdraw-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const body = Object.fromEntries(formData.entries());
+        body.pid = selectedPortfolioId;
+        const result = await sendRequest('/portfolios/withdraw', 'POST', body);
+        alert(JSON.stringify(result.message || result.error));
+        await updateCashDisplay(); // Update cash display
+    });
+
+    document.getElementById('transfer-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const body = Object.fromEntries(formData.entries());
+        body.from = selectedPortfolioId;
+        const result = await sendRequest('/portfolios/transfer', 'POST', body);
+        alert(JSON.stringify(result.message || result.error));
+        await updateCashDisplay(); // Update cash display
+    });
+}
+
+// Update the displayed cash value
+async function updateCashDisplay() {
+    try {
+        const response = await sendRequest(`/portfolios/${selectedPortfolioId}/cash`);
+        const cashElement = document.getElementById('portfolio-list-cash');
+        if (cashElement && response.cash !== undefined) {
+            cashElement.textContent = `Cash: $${response.cash}`;
+        }
+        const otherCashElement = document.getElementById('portfolio-cash');
+        if (otherCashElement && response.cash !== undefined) {
+            otherCashElement.textContent = `Cash: $${response.cash}`;
+        }
+    } catch (error) {
+        console.error("Error updating cash display:", error);
+    }
 }
 
 // Add a stock to the selected portfolio

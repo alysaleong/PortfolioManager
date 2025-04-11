@@ -92,7 +92,7 @@
                     <h3>Stock List Details</h3>
                 </div>
                 <div id="stocks-container">
-                    <div id="stocks-in-list-container" class="sub-content-section" stype="display: none;">
+                    <div id="stocks-in-list-container" class="sub-content-section" style="display: none;">
                         <!-- <h3>Stocks in Selected List</h3> -->
                     </div>
                     <form id="add-stock-form" class="sub-content-section" style="display: none;">
@@ -150,6 +150,26 @@
                     <input type="number" name="quantity" placeholder="Quantity" required>
                     <button type="submit">Add Stock</button>
                 </form>
+                <div id="portfolio-actions-container" class="sub-content-section" style="display: none;">
+                    <form id="deposit-form">
+                        <h4>Deposit Money</h4>
+                        <input type="number" name="deposit" placeholder="Amount" required>
+                        <button type="submit">Deposit</button>
+                    </form>
+                    <form id="withdraw-form">
+                        <h4>Withdraw Money</h4>
+                        <input type="number" name="withdrawal" placeholder="Amount" required>
+                        <button type="submit">Withdraw</button>
+                    </form>
+                    <form id="transfer-form">
+                        <h4>Transfer Money</h4>
+                        <input type="number" name="amount" placeholder="Amount" required>
+                        <select name="to" id="transfer-to-portfolio">
+                            <option value="" disabled selected>Select Portfolio</option>
+                        </select>
+                        <button type="submit">Transfer</button>
+                    </form>
+                </div>
             </section>
         </section>
     </main>
