@@ -44,6 +44,7 @@ async function selectStockList(slid) {
     const stocksContainer = document.getElementById('stocks-in-list-container');
     const addStockForm = document.getElementById('stocklist-add-stock-form');
     const stockListStatsContainer = document.getElementById('stocklist-stats-container');
+    const stockListReviewsContainer = document.getElementById('stocklist-reviews-container');
 
     // display stock list details
     stockListDetailsContainer.style.display = 'block';
@@ -126,6 +127,10 @@ async function selectStockList(slid) {
         const stockListStatsContainer = document.getElementById('stocklist-stats-container');
         await displayStockListStats(stocks, stockListStatsContainer, startDate, endDate);
     });
+
+    // Load and display reviews for the stock list
+    await loadStockListReviews(slid);
+    stockListReviewsContainer.style.display = 'block'; // Ensure the reviews container is visible
 }
 
 // display stock list statistics
@@ -149,8 +154,6 @@ async function displayStockListStats(stocks, container, startDate, endDate) {
         const betaResults = await Promise.all(betaPromises);
         const covMatrix = await covMatrixPromise;
 
-        console.log('Covariance mat:', covMatrix);
-
         const resultsContainer = document.getElementById('stocklist-stats-results');
         resultsContainer.innerHTML = `<h4>Coefficient of Variation (COV)</h4>`;
         stocks.forEach((stock, index) => {
@@ -168,7 +171,7 @@ async function displayStockListStats(stocks, container, startDate, endDate) {
             let matrixHTML = '<table border="1" style="border-collapse: collapse; text-align: center;">';
             matrixHTML += '<tr><th></th>' + symbols.map(symbol => `<th>${symbol}</th>`).join('') + '</tr>';
             covMatrix.forEach((row, rowIndex) => {
-                matrixHTML += `<tr><th>${symbols[rowIndex]}</th>` + row.map(cell => `<td>${cell[0].toFixed(2)}</td>`).join('') + '</tr>';
+                matrixHTML += `<tr><th>${symbols[rowIndex]}</th>` + row.map(cell => `<td>${cell[0]}</td>`).join('') + '</tr>';
             });
             matrixHTML += '</table>';
             resultsContainer.innerHTML += matrixHTML;
@@ -178,6 +181,50 @@ async function displayStockListStats(stocks, container, startDate, endDate) {
     } catch (error) {
         console.error('Error fetching stock list stats:', error);
         container.innerHTML += `<div>Error fetching stock list stats</div>`;
+    }
+}
+
+// Load reviews for the selected stock list
+async function loadStockListReviews(slid) {
+    const reviewsContainer = document.getElementById('stocklist-reviews');
+    reviewsContainer.innerHTML = '<h4>Loading reviews...</h4>';
+
+    try {
+        const reviews = await sendRequest(`/reviews/${slid}`);
+        if (reviews.length === 0) {
+            reviewsContainer.innerHTML = '<div>No reviews available for this stock list.</div>';
+            return;
+        }
+
+        let reviewsHTML = '';
+        reviews.forEach(review => {
+            reviewsHTML += `
+                <div class="review-item">
+                    <div><strong>User:</strong> ${review.uid}</div>
+                    <div><strong>Review:</strong> ${review.review || 'No review text provided'}</div>
+                    <button class="delete-review-button" data-uid="${review.uid}">Delete</button>
+                </div>
+            `;
+        });
+
+        reviewsContainer.innerHTML = reviewsHTML;
+
+        // Add event listeners for delete buttons
+        const deleteButtons = document.querySelectorAll('.delete-review-button');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', async (e) => {
+                const uid = e.target.dataset.uid;
+                const confirmDelete = confirm(`Are you sure you want to delete the review by user ${uid}?`);
+                if (confirmDelete) {
+                    const result = await sendRequest(`/reviews/${slid}`, 'DELETE', { reviewer: uid });
+                    alert(JSON.stringify(result.message || result.error));
+                    await loadStockListReviews(slid); // Reload reviews after deletion
+                }
+            });
+        });
+    } catch (error) {
+        console.error('Error loading reviews:', error);
+        reviewsContainer.innerHTML = '<div>Error loading reviews.</div>';
     }
 }
 

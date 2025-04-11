@@ -290,7 +290,7 @@ async function displayPortfolioStats(stocks, container, startDate, endDate) {
             let matrixHTML = '<table border="1" style="border-collapse: collapse; text-align: center;">';
             matrixHTML += '<tr><th></th>' + symbols.map(symbol => `<th>${symbol}</th>`).join('') + '</tr>';
             covMatrix.forEach((row, rowIndex) => {
-                matrixHTML += `<tr><th>${symbols[rowIndex]}</th>` + row.map(cell => `<td>${cell[0].toFixed(2)}</td>`).join('') + '</tr>';
+                matrixHTML += `<tr><th>${symbols[rowIndex]}</th>` + row.map(cell => `<td>${cell[0]}</td>`).join('') + '</tr>';
             });
             matrixHTML += '</table>';
             resultsContainer.innerHTML += matrixHTML;
