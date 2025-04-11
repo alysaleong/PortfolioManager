@@ -63,6 +63,18 @@
                 <div id="friends-list" class="sub-content-section">
                     <h3>Your Friends</h3>
                 </div>
+                <div id="invite-friend-container" class="sub-content-section" style="display: none;">
+                    <h3>Invite Friend to Review Stock List</h3>
+                    <form id="invite-friend-form">
+                        <select id="stocklist-dropdown" name="slid" required>
+                            <option value="" disabled selected>Select Stock List</option>
+                        </select>
+                        <select id="friend-dropdown" name="friend" required>
+                            <option value="" disabled selected>Select Friend</option>
+                        </select>
+                        <button type="submit">Invite</button>
+                    </form>
+                </div>
             </section>
 
             <section id="request-content" class="content-section" style="display: none;">

@@ -59,18 +59,9 @@ async function loadReviewingLists() {
         listEl.innerHTML = `
             <div class="stocklist-name">${list.slname}</div>
             <button class="write-review-button" data-slid="${list.slid}">Write Review</button>
+            <button class="delete-review-button" data-slid="${list.slid}">Delete Review</button>
         `;
         reviewingListsContainer.appendChild(listEl);
-    });
-
-    // Add event listeners for "View Stocks" buttons
-    const viewStocksButtons = document.querySelectorAll('.view-stocks-button');
-    viewStocksButtons.forEach(button => {
-        button.addEventListener('click', async (e) => {
-            e.preventDefault();
-            const slid = e.target.dataset.slid;
-            await loadStockListDetails(slid);
-        });
     });
 
     // Add event listeners for "Write Review" buttons
@@ -82,6 +73,21 @@ async function loadReviewingLists() {
             await loadStockListDetails(selectedStockListId); // Load stocks in the stock list
             document.getElementById('write-review-form').style.display = 'block';
             await prefillReviewForm(selectedStockListId); // Pre-fill the form with the existing review
+        });
+    });
+
+    // Add event listeners for "Delete Review" buttons
+    const deleteReviewButtons = document.querySelectorAll('.delete-review-button');
+    deleteReviewButtons.forEach(button => {
+        button.addEventListener('click', async (e) => {
+            e.preventDefault(); // Prevent default behavior
+            const slid = e.target.dataset.slid;
+            const confirmDelete = confirm(`Are you sure you want to delete your review for stock list ${slid}?`);
+            if (confirmDelete) {
+                const result = await sendRequest(`/reviews/${slid}`, 'DELETE');
+                alert(JSON.stringify(result.message || result.error));
+                await loadReviewingLists(); // Reload the reviewing lists after deletion
+            }
         });
     });
 }
