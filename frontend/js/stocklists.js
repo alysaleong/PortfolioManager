@@ -197,15 +197,16 @@ async function loadStockListReviews(slid) {
         }
 
         let reviewsHTML = '';
-        reviews.forEach(review => {
+        for (const review of reviews) {
+            const userEmail = await sendRequest(`/users/uid/${review.uid}/email`);
             reviewsHTML += `
                 <div class="review-item">
-                    <div><strong>User:</strong> ${review.uid}</div>
+                    <div><strong>User:</strong> ${userEmail.email}</div>
                     <div><strong>Review:</strong> ${review.review || 'No review text provided'}</div>
                     <button class="delete-review-button" data-uid="${review.uid}">Delete</button>
                 </div>
             `;
-        });
+        }
 
         reviewsContainer.innerHTML = reviewsHTML;
 
