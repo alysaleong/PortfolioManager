@@ -238,18 +238,18 @@
                     <form id="add-stock-form" class="sub-content-section">
                         <h3>Add/Update Stock</h3>
                         <input type="text" name="symbol" placeholder="Stock Symbol" required>
-                        <input type="number" name="curr_val" placeholder="Current Value" required>
+                        <input type="number" step="0.01" name="curr_val" placeholder="Current Value" required>
                         <button type="submit">Add/Update Stock</button>
                     </form>
                     <form id="add-historical-stock-form" class="sub-content-section">
                         <h3>Add Historical Stock Data</h3>
                         <input type="text" name="symbol" placeholder="Stock Symbol" required>
                         <input type="date" name="timestamp" placeholder="Date (YYYY-MM-DD)" required>
-                        <input type="number" name="open" placeholder="Open Price" required>
-                        <input type="number" name="high" placeholder="High Price" required>
-                        <input type="number" name="low" placeholder="Low Price" required>
-                        <input type="number" name="close" placeholder="Close Price" required>
-                        <input type="number" name="volume" placeholder="Volume" required>
+                        <input type="number" step="0.01" name="open" placeholder="Open Price" required>
+                        <input type="number" step="0.01" name="high" placeholder="High Price" required>
+                        <input type="number" step="0.01" name="low" placeholder="Low Price" required>
+                        <input type="number" step="0.01" name="close" placeholder="Close Price" required>
+                        <input type="number" step="0.01" name="volume" placeholder="Volume" required>
                         <button type="submit">Add Historical Data</button>
                     </form>
                     <form id="predict-stock-form" class="sub-content-section">

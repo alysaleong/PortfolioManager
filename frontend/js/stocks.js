@@ -9,7 +9,7 @@ document.getElementById('add-stock-form').addEventListener('submit', async (e) =
     const formData = new FormData(e.target);
     const body = Object.fromEntries(formData.entries());
     const result = await sendRequest('/stocks', 'POST', body);
-    alert(JSON.stringify(result.message || result.error));
+    alert(result.message || result.error);
 });
 
 // Add historical stock data
@@ -18,7 +18,7 @@ document.getElementById('add-historical-stock-form').addEventListener('submit', 
     const formData = new FormData(e.target);
     const body = Object.fromEntries(formData.entries());
     const result = await sendRequest('/stocks/hist', 'POST', body);
-    alert(JSON.stringify(result.message || result.error));
+    alert(result.message || result.error);
 });
 
 // View stock performance
@@ -26,8 +26,10 @@ document.getElementById('view-stock-form').addEventListener('submit', async (e) 
     e.preventDefault();
     const formData = new FormData(e.target);
     const symbol = formData.get('symbol');
-    const startDate = formData.get('start-date');
-    const endDate = formData.get('end-date');
+    const startDate = new Date(formData.get('start-date')).toISOString(); // Convert to UTC
+    const endDate = new Date(formData.get('end-date'));
+    endDate.setDate(endDate.getDate() + 1); // Add one day to include the end date
+    const endDateUTC = endDate.toISOString(); // Convert to UTC
 
     try {
         selectedStockSymbol = symbol;
@@ -35,17 +37,20 @@ document.getElementById('view-stock-form').addEventListener('submit', async (e) 
 
         // Filter details within the specified date range
         const filteredDetails = stockDetails.filter(data => {
-            const date = new Date(data.timestamp);
-            return date >= new Date(startDate) && date <= new Date(endDate);
+            const date = new Date(data.timestamp).toISOString();
+            return date >= startDate && date < endDateUTC;
         });
 
-        if (filteredDetails.length === 0) {
+        // Sort details by date
+        const sortedDetails = filteredDetails.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+        if (sortedDetails.length === 0) {
             alert('No data available for the specified time interval.');
             return;
         }
 
-        displayStockDetails(filteredDetails);
-        plotStockPerformance(filteredDetails);
+        displayStockDetails(sortedDetails);
+        plotStockPerformance(sortedDetails);
     } catch (error) {
         console.error('Error fetching stock performance:', error);
         alert('Failed to fetch stock performance. Please check the stock symbol and try again.');

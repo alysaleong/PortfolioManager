@@ -87,7 +87,7 @@ async function loadReviewingLists() {
             const confirmDelete = confirm(`Are you sure you want to delete your review for stock list ${slid}?`);
             if (confirmDelete) {
                 const result = await sendRequest(`/reviews/${slid}`, 'DELETE');
-                alert(JSON.stringify(result.message || result.error));
+                alert(result.message || result.error);
                 await loadReviewingLists(); // Reload the reviewing lists after deletion
             }
         });
@@ -187,12 +187,12 @@ document.getElementById('write-review-form').addEventListener('submit', async (e
         if (existingReview && existingReview.review !== undefined) {
             // If a review exists, send a PATCH request to update it
             const result = await sendRequest(`/reviews/${selectedStockListId}`, 'PATCH', body);
-            alert(JSON.stringify(result.message || result.error));
+            alert(result.message || result.error);
         }
     } catch (error) {
         // If no review exists, send a POST request to create it
         const result = await sendRequest(`/reviews/${selectedStockListId}`, 'POST', body);
-        alert(JSON.stringify(result.message || result.error));
+        alert(result.message || result.error);
     }
 
     document.getElementById('write-review-form').style.display = 'none';
