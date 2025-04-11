@@ -11,6 +11,8 @@
     <script type="module" src="./js/reviews.js" defer></script>
     <script type="module" src="./js/requests.js" defer></script>
     <script type="module" src="./js/portfolios.js" defer></script>
+    <script type="module" src="./js/stocks.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="style/main.css" rel="stylesheet" type="text/css">
 </head>
 <body>
@@ -45,6 +47,7 @@
                 <button class="nav-button" id="stocklists-tab" data-target="stocklist-content">Stock Lists</button>
                 <button class="nav-button" id="reviews-tab" data-target="review-content">Reviews</button>
                 <button class="nav-button" id="portfolio-tab" data-target="portfolio-content">Portfolio</button>
+                <button class="nav-button" id="stocks-tab" data-target="stocks-content">Stocks</button>
                 <button id="logout-button" class="nav-button logout-button">Logout</button>
             </nav>
 
@@ -196,6 +199,47 @@
                     </form>
                     <div id="portfolio-stats-results">
                         <!-- Portfolio statistics will be dynamically populated here -->
+                    </div>
+                </div>
+            </section>
+
+            <section id="stocks-content" class="content-section" style="display: none;">
+                <h2>Stocks</h2>
+                <div id="stocks-actions">
+                    <form id="add-stock-form" class="sub-content-section">
+                        <h3>Add/Update Stock</h3>
+                        <input type="text" name="symbol" placeholder="Stock Symbol" required>
+                        <input type="number" name="curr_val" placeholder="Current Value" required>
+                        <button type="submit">Add/Update Stock</button>
+                    </form>
+                    <form id="add-historical-stock-form" class="sub-content-section">
+                        <h3>Add Historical Stock Data</h3>
+                        <input type="text" name="symbol" placeholder="Stock Symbol" required>
+                        <input type="date" name="timestamp" placeholder="Date (YYYY-MM-DD)" required>
+                        <input type="number" name="open" placeholder="Open Price" required>
+                        <input type="number" name="high" placeholder="High Price" required>
+                        <input type="number" name="low" placeholder="Low Price" required>
+                        <input type="number" name="close" placeholder="Close Price" required>
+                        <input type="number" name="volume" placeholder="Volume" required>
+                        <button type="submit">Add Historical Data</button>
+                    </form>
+                    <form id="view-stock-form" class="sub-content-section">
+                        <h3>View Stock Performance</h3>
+                        <input type="text" name="symbol" placeholder="Stock Symbol" required>
+                        <label for="start-date">Start Date:</label>
+                        <input type="date" id="start-date" name="start-date" required>
+                        <label for="end-date">End Date:</label>
+                        <input type="date" id="end-date" name="end-date" required>
+                        <button type="submit">View Performance</button>
+                    </form>
+                </div>
+                <div id="stock-details-container" class="sub-content-section" style="display: none;">
+                    <h3>Stock Details</h3>
+                    <div style="width: 100%; overflow-x: auto;">
+                        <canvas id="stock-performance-chart" style="max-width: 100%; height: 400px;"></canvas>
+                    </div>
+                    <div id="stock-details">
+                        <!-- Stock details will be dynamically populated here -->
                     </div>
                 </div>
             </section>
