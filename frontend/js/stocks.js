@@ -52,6 +52,23 @@ document.getElementById('view-stock-form').addEventListener('submit', async (e) 
     }
 });
 
+// Predict stock price
+document.getElementById('predict-stock-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const body = Object.fromEntries(formData.entries());
+    const symbol = body.symbol;
+    const timestamp = body.timestamp;
+
+    try {
+        const result = await sendRequest(`/stocks/symbol/${symbol}/future`, 'POST', { timestamp });
+        alert(result.message || 'Prediction failed');
+    } catch (error) {
+        console.error('Error generating prediction:', error);
+        alert('Failed to generate prediction. Please check the stock symbol and try again.');
+    }
+});
+
 // Display stock details in a table
 function displayStockDetails(details) {
     const stockDetailsContainer = document.getElementById('stock-details-container');

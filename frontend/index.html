@@ -223,8 +223,15 @@
                         <input type="number" name="volume" placeholder="Volume" required>
                         <button type="submit">Add Historical Data</button>
                     </form>
+                    <form id="predict-stock-form" class="sub-content-section">
+                        <h3>Predict Stock Price</h3>
+                        <input type="text" name="symbol" placeholder="Stock Symbol" required>
+                        <label for="prediction-date">Prediction Date:</label>
+                        <input type="date" id="prediction-date" name="timestamp" required>
+                        <button type="submit">Generate Prediction</button>
+                    </form>
                     <form id="view-stock-form" class="sub-content-section">
-                        <h3>View Stock Performance</h3>
+                        <h3>View Historical Stock Performance</h3>
                         <input type="text" name="symbol" placeholder="Stock Symbol" required>
                         <label for="start-date">Start Date:</label>
                         <input type="date" id="start-date" name="start-date" required>
