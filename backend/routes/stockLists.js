@@ -3,6 +3,7 @@ import express from "express";
 import { pool } from "../server.js";
 import { is_stocklist_owned_by } from "../services/stocklistServices.js";
 import { can_review } from "../services/friendsServices.js";
+import { computeCov } from "../services/stockServices.js";
 
 const router = express.Router();
 
@@ -22,7 +23,7 @@ router.get('/', async (req, res) => {
 router.get('/reviewing', async (req, res) => {
     const uid = req.session.uid;
     const stock_lists = await pool.query(
-        `SELECT slid, slname, public FROM stock_lists 
+        `SELECT uid, slid, slname, public FROM stock_lists 
         WHERE slid IN (SELECT slid FROM reviews WHERE uid = $1)`,
         [uid]
     );
@@ -277,6 +278,47 @@ router.delete('/:slid', async (req, res) => {
     } finally {
         client.release();
     }
+});
+
+// compute covariance matrix of given portfolio for the given timestamp
+router.post('/cov', async (req, res) => {
+    const uid = req.session.uid;
+    const slid = req.body.slid;
+    const start_date = req.body.start_date;
+    const end_date = req.body.end_date;
+
+    // check if the slid belongs to this user
+    if (!await is_stocklist_owned_by(slid, uid)) {
+        return res.status(400).json({ error: "Invalid stock list id or you are not the owner of this stock list" });
+    }
+
+    // get list of stocks in stock list
+    let stocks = await pool.query(
+        `SELECT symbol 
+        FROM in_list 
+        WHERE slid = $1`,
+        [slid]
+    );
+    
+    // check if there are any stocks in the portfolio
+    if (stocks.rows.length === 0) {
+        res.status(400).json({error: "Must have at least one stock in portfolio"});
+        return;
+    }
+    stocks = stocks.rows.map(row => row.symbol);
+
+    let cov_mat = new Array(stocks.length);
+    for (let k = 0; k < cov_mat.length; k++) {
+        cov_mat[k] = new Array(stocks.length);
+    };
+
+    for (let i = 0; i < stocks.length; i++) {
+        for (let j = 0; j < stocks.length; j++) {
+            cov_mat[i][j] = [await computeCov(stocks[i], stocks[j], start_date, end_date), stocks[i], stocks[j]];
+        };
+    };
+
+    res.status(500).json(cov_mat);
 });
 
 

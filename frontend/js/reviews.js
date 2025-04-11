@@ -40,6 +40,7 @@ async function loadPublicLists() {
             selectedStockListId = e.target.dataset.slid;
             await loadStockListDetails(selectedStockListId); // Load stocks in the stock list
             document.getElementById('write-review-form').style.display = 'block';
+            await prefillReviewForm(selectedStockListId); // Pre-fill the form with the existing review
         });
     });
 }
@@ -52,25 +53,18 @@ async function loadReviewingLists() {
     const reviewingListsContainer = document.getElementById('reviewing-lists-container');
     reviewingListsContainer.innerHTML = '<h3>Lists I\'m Reviewing</h3>'; // Clear the container
     const reviewingLists = await sendRequest('/stocklists/reviewing');
-    reviewingLists.forEach(list => {
+    for (const list of reviewingLists) {
+        // Fetch the owner's email for each stock list
+        const ownerEmail = await sendRequest(`/users/uid/${list.uid}/email`);
         const listEl = document.createElement('div');
         listEl.classList.add('stocklist-item');
         listEl.innerHTML = `
-            <div class="stocklist-name">${list.slname}</div>
+            <div class="stocklist-name">${list.slname} (Owner: ${ownerEmail.email})</div>
             <button class="write-review-button" data-slid="${list.slid}">Write Review</button>
+            <button class="delete-review-button" data-slid="${list.slid}">Delete Review</button>
         `;
         reviewingListsContainer.appendChild(listEl);
-    });
-
-    // Add event listeners for "View Stocks" buttons
-    const viewStocksButtons = document.querySelectorAll('.view-stocks-button');
-    viewStocksButtons.forEach(button => {
-        button.addEventListener('click', async (e) => {
-            e.preventDefault();
-            const slid = e.target.dataset.slid;
-            await loadStockListDetails(slid);
-        });
-    });
+    }
 
     // Add event listeners for "Write Review" buttons
     const writeReviewButtons = document.querySelectorAll('.write-review-button');
@@ -80,6 +74,22 @@ async function loadReviewingLists() {
             selectedStockListId = e.target.dataset.slid;
             await loadStockListDetails(selectedStockListId); // Load stocks in the stock list
             document.getElementById('write-review-form').style.display = 'block';
+            await prefillReviewForm(selectedStockListId); // Pre-fill the form with the existing review
+        });
+    });
+
+    // Add event listeners for "Delete Review" buttons
+    const deleteReviewButtons = document.querySelectorAll('.delete-review-button');
+    deleteReviewButtons.forEach(button => {
+        button.addEventListener('click', async (e) => {
+            e.preventDefault(); // Prevent default behavior
+            const slid = e.target.dataset.slid;
+            const confirmDelete = confirm(`Are you sure you want to delete your review for stock list ${slid}?`);
+            if (confirmDelete) {
+                const result = await sendRequest(`/reviews/${slid}`, 'DELETE');
+                alert(JSON.stringify(result.message || result.error));
+                await loadReviewingLists(); // Reload the reviewing lists after deletion
+            }
         });
     });
 }
@@ -102,6 +112,24 @@ async function loadStockListDetails(slid) {
         stockListDetailsContainer.appendChild(stockEl);
     });
     stockListDetailsContainer.style.display = 'block';
+}
+
+// Pre-fill the review form with the existing review if available
+async function prefillReviewForm(slid) {
+    try {
+        // Fetch the user's UID from the /me endpoint
+        const user = await sendRequest('/me');
+        const uid = user.uid;
+
+        // Fetch the existing review using the UID
+        const existingReview = await sendRequest(`/reviews/${slid}/users/${uid}`, 'GET');
+        if (existingReview && existingReview.review !== undefined) {
+            const reviewForm = document.getElementById('write-review-form');
+            reviewForm.querySelector('textarea[name="review"]').value = existingReview.review;
+        }
+    } catch (error) {
+        console.log("No existing review found or error fetching review:", error);
+    }
 }
 
 // Handle toggles for public and reviewing lists
@@ -148,17 +176,25 @@ document.getElementById('write-review-form').addEventListener('submit', async (e
     }
     const formData = new FormData(e.target);
     const body = Object.fromEntries(formData.entries());
-    const result = await sendRequest(`/reviews/${selectedStockListId}`, 'POST', body);
-    alert(JSON.stringify(result));
+
+    try {
+        // Try to fetch the existing review
+        // Fetch the user's UID from the /me endpoint
+        const user = await sendRequest('/me');
+        const uid = user.uid;
+
+        const existingReview = await sendRequest(`/reviews/${selectedStockListId}/users/${uid}`, 'GET');
+        if (existingReview && existingReview.review !== undefined) {
+            // If a review exists, send a PATCH request to update it
+            const result = await sendRequest(`/reviews/${selectedStockListId}`, 'PATCH', body);
+            alert(JSON.stringify(result.message || result.error));
+        }
+    } catch (error) {
+        // If no review exists, send a POST request to create it
+        const result = await sendRequest(`/reviews/${selectedStockListId}`, 'POST', body);
+        alert(JSON.stringify(result.message || result.error));
+    }
+
     document.getElementById('write-review-form').style.display = 'none';
     document.getElementById('review-stocks-container').style.display = 'none'; // Hide stocks after submission
-});
-
-// create review
-document.getElementById('create-review-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const body = Object.fromEntries(formData.entries());
-    const result = await sendRequest('/reviews', 'POST', body);
-    alert(JSON.stringify(result));
 });

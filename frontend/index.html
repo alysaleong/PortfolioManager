@@ -10,6 +10,9 @@
     <script type="module" src="./js/stocklists.js" defer></script>
     <script type="module" src="./js/reviews.js" defer></script>
     <script type="module" src="./js/requests.js" defer></script>
+    <script type="module" src="./js/portfolios.js" defer></script>
+    <script type="module" src="./js/stocks.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="style/main.css" rel="stylesheet" type="text/css">
 </head>
 <body>
@@ -43,6 +46,8 @@
                 <button class="nav-button" id="requests-tab" data-target="request-content">Requests</button>
                 <button class="nav-button" id="stocklists-tab" data-target="stocklist-content">Stock Lists</button>
                 <button class="nav-button" id="reviews-tab" data-target="review-content">Reviews</button>
+                <button class="nav-button" id="portfolio-tab" data-target="portfolio-content">Portfolio</button>
+                <button class="nav-button" id="stocks-tab" data-target="stocks-content">Stocks</button>
                 <button id="logout-button" class="nav-button logout-button">Logout</button>
             </nav>
 
@@ -57,6 +62,18 @@
                 </div>
                 <div id="friends-list" class="sub-content-section">
                     <h3>Your Friends</h3>
+                </div>
+                <div id="invite-friend-container" class="sub-content-section" style="display: none;">
+                    <h3>Invite Friend to Review Stock List</h3>
+                    <form id="invite-friend-form">
+                        <select id="stocklist-dropdown" name="slid" required>
+                            <option value="" disabled selected>Select Stock List</option>
+                        </select>
+                        <select id="friend-dropdown" name="friend" required>
+                            <option value="" disabled selected>Select Friend</option>
+                        </select>
+                        <button type="submit">Invite</button>
+                    </form>
                 </div>
             </section>
 
@@ -88,17 +105,37 @@
                 </div>
                 <div id="stocklist-details" class="sub-content-section" style="display: none;">
                     <h3>Stock List Details</h3>
+                    
                 </div>
                 <div id="stocks-container">
-                    <div id="stocks-in-list-container" class="sub-content-section" stype="display: none;">
+                    <div id="stocks-in-list-container" class="sub-content-section" style="display: none;">
                         <!-- <h3>Stocks in Selected List</h3> -->
                     </div>
-                    <form id="add-stock-form" class="sub-content-section" style="display: none;">
+                    <form id="stocklist-add-stock-form" class="sub-content-section" style="display: none;">
                         <h3>Add Stock</h3>
                         <input type="text" name="symbol" placeholder="Stock Symbol" required>
                         <input type="number" name="quantity" placeholder="Quantity" required>
                         <button type="submit">Add Stock</button>
                     </form>
+                </div>
+                <div id="stocklist-stats-container" class="sub-content-section" style="display: none;">
+                    <h3>Stock List Statistics</h3>
+                    <form id="stocklist-stats-form">
+                        <label for="start-date">Start Date:</label>
+                        <input type="date" id="start-date1" name="start-date" required>
+                        <label for="end-date">End Date:</label>
+                        <input type="date" id="end-date1" name="end-date" required>
+                        <button type="submit">Generate Statistics</button>
+                    </form>
+                    <div id="stocklist-stats-results">
+                        <!-- Stock list statistics will be dynamically populated here -->
+                    </div>
+                </div>
+                <div id="stocklist-reviews-container" class="sub-content-section" style="display: none;">
+                    <h3>Reviews</h3>
+                    <div id="stocklist-reviews">
+                        <!-- Reviews will be dynamically populated here -->
+                    </div>
                 </div>
             </section>
 
@@ -121,6 +158,126 @@
                     <textarea name="review" placeholder="Write your review..." maxlength="4000" required></textarea>
                     <button type="submit">Submit Review</button>
                 </form>
+            </section>
+
+            <section id="portfolio-content" class="content-section" style="display: none;">
+                <h2>Portfolio</h2>
+                <div id="portfolio-actions">
+                    <form id="add-portfolio-form" class="sub-content-section">
+                        <h3>Create Portfolio</h3>
+                        <input type="text" name="pname" placeholder="Portfolio Name (default: 'My Portfolio')">
+                        <input type="number" name="cash" placeholder="Initial Cash (optional)">
+                        <button type="submit">Create</button>
+                    </form>
+                </div>
+                <div id="portfolios-container" class="sub-content-section">
+                    <h3>Your Portfolios</h3>
+                </div>
+                <div id="portfolio-details" class="sub-content-section" style="display: none;">
+                    <h3>Portfolio Details</h3>
+                    <!-- Portfolio details will be dynamically populated here -->
+                </div>
+                <div id="portfolio-stocks-container" class="sub-content-section" style="display: none;">
+                    <h3>Stocks in Portfolio</h3>
+                    <!-- Portfolio stocks will be dynamically populated here -->
+                </div>
+                <form id="add-stock-to-portfolio-form" class="sub-content-section" style="display: none;">
+                    <h3>Add Stock</h3>
+                    <input type="text" name="symbol" placeholder="Stock Symbol" required>
+                    <input type="number" name="quantity" placeholder="Quantity" required>
+                    <button type="submit">Add Stock</button>
+                </form>
+                <div id="portfolio-actions-container" class="sub-content-section" style="display: none;">
+                    <form id="deposit-form">
+                        <h4>Deposit Money</h4>
+                        <input type="number" name="deposit" placeholder="Amount" required>
+                        <button type="submit">Deposit</button>
+                    </form>
+                    <form id="withdraw-form">
+                        <h4>Withdraw Money</h4>
+                        <input type="number" name="withdrawal" placeholder="Amount" required>
+                        <button type="submit">Withdraw</button>
+                    </form>
+                    <form id="transfer-form">
+                        <h4>Transfer Money</h4>
+                        <input type="number" name="amount" placeholder="Amount" required>
+                        <select name="to" id="transfer-to-portfolio">
+                            <option value="" disabled selected>Select Portfolio</option>
+                        </select>
+                        <button type="submit">Transfer</button>
+                    </form>
+                </div>
+                <div id="portfolio-stats-container" class="sub-content-section" style="display: none;">
+                    <h3>Portfolio Statistics</h3>
+                    <form id="portfolio-stats-form">
+                        <label for="start-date">Start Date:</label>
+                        <input type="date" id="start-date2" name="start-date" required>
+                        <label for="end-date">End Date:</label>
+                        <input type="date" id="end-date2" name="end-date" required>
+                        <button type="submit">Generate Statistics</button>
+                    </form>
+                    <div id="portfolio-stats-results">
+                        <!-- Portfolio statistics will be dynamically populated here -->
+                    </div>
+                </div>
+                <div id="portfolio-history-container" class="sub-content-section" style="display: none;">
+                    <h3>Portfolio Transaction History</h3>
+                    <div id="portfolio-history-buttons">
+                        <button id="bought-history-button" class="history-button">Bought History</button>
+                        <button id="sold-history-button" class="history-button">Sold History</button>
+                    </div>
+                    <div id="portfolio-history">
+                        <!-- Transaction history will be dynamically populated here -->
+                    </div>
+                </div>
+            </section>
+
+            <section id="stocks-content" class="content-section" style="display: none;">
+                <h2>Stocks</h2>
+                <div id="stocks-actions">
+                    <form id="add-stock-form" class="sub-content-section">
+                        <h3>Add/Update Stock</h3>
+                        <input type="text" name="symbol" placeholder="Stock Symbol" required>
+                        <input type="number" name="curr_val" placeholder="Current Value" required>
+                        <button type="submit">Add/Update Stock</button>
+                    </form>
+                    <form id="add-historical-stock-form" class="sub-content-section">
+                        <h3>Add Historical Stock Data</h3>
+                        <input type="text" name="symbol" placeholder="Stock Symbol" required>
+                        <input type="date" name="timestamp" placeholder="Date (YYYY-MM-DD)" required>
+                        <input type="number" name="open" placeholder="Open Price" required>
+                        <input type="number" name="high" placeholder="High Price" required>
+                        <input type="number" name="low" placeholder="Low Price" required>
+                        <input type="number" name="close" placeholder="Close Price" required>
+                        <input type="number" name="volume" placeholder="Volume" required>
+                        <button type="submit">Add Historical Data</button>
+                    </form>
+                    <form id="predict-stock-form" class="sub-content-section">
+                        <h3>Predict Stock Price</h3>
+                        <input type="text" name="symbol" placeholder="Stock Symbol" required>
+                        <label for="prediction-date">Prediction Date:</label>
+                        <input type="date" id="prediction-date" name="timestamp" required>
+                        <button type="submit">Generate Prediction</button>
+                    </form>
+                    <form id="view-stock-form" class="sub-content-section">
+                        <h3>View Historical Stock Performance</h3>
+                        <input type="text" name="symbol" placeholder="Stock Symbol" required>
+                        <label for="start-date">Start Date:</label>
+                        <input type="date" id="start-date" name="start-date" required>
+                        <label for="end-date">End Date:</label>
+                        <input type="date" id="end-date" name="end-date" required>
+                        <button type="submit">View Performance</button>
+                    </form>
+                </div>
+                <div id="stock-details-container" class="sub-content-section" style="display: none;">
+                    <h3>Stock Details</h3>
+                    <div style="width: 100%; overflow-x: auto;">
+                        <canvas id="stock-performance-chart" style="max-width: 100%; height: 400px;"></canvas>
+                    </div>
+                    <div id="stock-details">
+                        <!-- Stock details will be dynamically populated here -->
+                    </div>
+                </div>
             </section>
         </section>
     </main>
