@@ -216,10 +216,17 @@ document.getElementById('write-review-form').addEventListener('submit', async (e
         const user = await sendRequest('/me');
         const uid = user.uid;
 
+
         const existingReview = await sendRequest(`/reviews/${selectedStockListId}/users/${uid}`, 'GET');
-        if (existingReview && existingReview.review !== undefined) {
+        if (existingReview && existingReview.review != undefined) {
             // If a review exists, send a PATCH request to update it
             const result = await sendRequest(`/reviews/${selectedStockListId}`, 'PATCH', body);
+            alert(result.message || result.error);
+        }
+        else 
+        {
+            // If no review exists, send a POST request to create it
+            const result = await sendRequest(`/reviews/${selectedStockListId}`, 'POST', body);
             alert(result.message || result.error);
         }
     } catch (error) {

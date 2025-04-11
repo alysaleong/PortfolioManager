@@ -31,7 +31,7 @@ router.get('/me', async (req, res) => {
 router.post('/register', async (req, res) => {
     // get the email and password from request
     const { email, password } = req.body;
-    const cash = req.body.cash || null;
+    const cash = req.body.cash || 0;
 
     // check if email is taken
     const emailTaken = await pool.query(
