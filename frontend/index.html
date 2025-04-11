@@ -140,9 +140,11 @@
                 </div>
                 <div id="portfolio-details" class="sub-content-section" style="display: none;">
                     <h3>Portfolio Details</h3>
+                    <!-- Portfolio details will be dynamically populated here -->
                 </div>
                 <div id="portfolio-stocks-container" class="sub-content-section" style="display: none;">
-                    <!-- <h3>Stocks in Selected Portfolio</h3> -->
+                    <h3>Stocks in Portfolio</h3>
+                    <!-- Portfolio stocks will be dynamically populated here -->
                 </div>
                 <form id="add-stock-to-portfolio-form" class="sub-content-section" style="display: none;">
                     <h3>Add Stock</h3>
@@ -169,6 +171,19 @@
                         </select>
                         <button type="submit">Transfer</button>
                     </form>
+                </div>
+                <div id="portfolio-stats-container" class="sub-content-section" style="display: none;">
+                    <h3>Portfolio Statistics</h3>
+                    <form id="portfolio-stats-form">
+                        <label for="start-date">Start Date:</label>
+                        <input type="date" id="start-date" name="start-date" required>
+                        <label for="end-date">End Date:</label>
+                        <input type="date" id="end-date" name="end-date" required>
+                        <button type="submit">Generate Statistics</button>
+                    </form>
+                    <div id="portfolio-stats-results">
+                        <!-- Portfolio statistics will be dynamically populated here -->
+                    </div>
                 </div>
             </section>
         </section>

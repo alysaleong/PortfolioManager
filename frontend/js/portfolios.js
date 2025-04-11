@@ -39,15 +39,22 @@ async function selectPortfolio(pid) {
     const portfolioDetails = await sendRequest(`/portfolios/${pid}`);
     const portfolioDetailsContainer = document.getElementById('portfolio-details');
     const portfolioStocksContainer = document.getElementById('portfolio-stocks-container');
+    const portfolioStatsContainer = document.getElementById('portfolio-stats-container');
     const addStockForm = document.getElementById('add-stock-to-portfolio-form');
     const portfolioActionsContainer = document.getElementById('portfolio-actions-container');
+
+    // Ensure all relevant sections are visible
+    portfolioDetailsContainer.style.display = 'block';
+    portfolioStocksContainer.style.display = 'block';
+    portfolioStatsContainer.style.display = 'block';
+    addStockForm.style.display = 'block';
+    portfolioActionsContainer.style.display = 'block';
 
     // Extract "Portfolio Total" data and filter it out from the stocks list
     const portfolioTotal = portfolioDetails.stocks.find(stock => stock.symbol === "Portfolio Total");
     const stocks = portfolioDetails.stocks.filter(stock => stock.symbol !== "Portfolio Total");
 
     // Display portfolio details
-    portfolioDetailsContainer.style.display = 'block';
     portfolioDetailsContainer.innerHTML = `
         <h3>${portfolioDetails.pname}</h3>
         <div id="portfolio-cash">Cash: $${portfolioDetails.cash}</div>
@@ -56,7 +63,6 @@ async function selectPortfolio(pid) {
     `;
 
     // Display stocks in the portfolio
-    portfolioStocksContainer.style.display = 'block';
     portfolioStocksContainer.innerHTML = `<h3>Stocks in ${portfolioDetails.pname}</h3>`;
     stocks.forEach(stock => {
         const stockEl = document.createElement('div');
@@ -71,8 +77,37 @@ async function selectPortfolio(pid) {
         portfolioStocksContainer.appendChild(stockEl);
     });
 
+    // Display portfolio stats
+    portfolioStatsContainer.innerHTML = `
+        <h3>Portfolio Statistics</h3>
+        <form id="portfolio-stats-form">
+            <label for="start-date">Start Date:</label>
+            <input type="date" id="start-date" required>
+            <label for="end-date">End Date:</label>
+            <input type="date" id="end-date" required>
+            <button type="submit">Get Statistics</button>
+        </form>
+        <div id="portfolio-stats-results"></div>
+    `;
+
+    // Add event listener for the portfolio stats form
+    document.getElementById('portfolio-stats-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const startDate = document.getElementById('start-date').value;
+        const endDate = document.getElementById('end-date').value;
+
+        if (!selectedPortfolioId) {
+            alert('Please select a portfolio first.');
+            return;
+        }
+
+        const portfolioDetails = await sendRequest(`/portfolios/${selectedPortfolioId}`);
+        const stocks = portfolioDetails.stocks.filter(stock => stock.symbol !== "Portfolio Total");
+        const portfolioStatsContainer = document.getElementById('portfolio-stats-container');
+        await displayPortfolioStats(stocks, portfolioStatsContainer, startDate, endDate);
+    });
+
     // Show the add stock form
-    addStockForm.style.display = 'block'; // Ensure the form is visible
     addStockForm.innerHTML = `
         <h4>Manage Stocks in ${portfolioDetails.pname}</h4>
         <input type="text" name="symbol" placeholder="Stock Symbol" required>
@@ -156,6 +191,57 @@ async function selectPortfolio(pid) {
         alert(JSON.stringify(result.message || result.error));
         await updateCashDisplay(); // Update cash display
     });
+}
+
+// Display portfolio statistics
+async function displayPortfolioStats(stocks, container, startDate, endDate) {
+    try {
+        const covPromises = stocks.map(stock => sendRequest(`/stocks/symbol/${stock.symbol}/cov`, 'POST', {
+            start_date: startDate,
+            end_date: endDate
+        }));
+        const betaPromises = stocks.map(stock => sendRequest(`/stocks/symbol/${stock.symbol}/beta`, 'POST', {
+            start_date: startDate,
+            end_date: endDate
+        }));
+        const covMatrixPromise = sendRequest('/portfolios/cov', 'POST', {
+            pid: selectedPortfolioId,
+            start_date: startDate,
+            end_date: endDate
+        });
+
+        const covResults = await Promise.all(covPromises);
+        const betaResults = await Promise.all(betaPromises);
+        const covMatrix = await covMatrixPromise;
+
+        const resultsContainer = document.getElementById('portfolio-stats-results');
+        resultsContainer.innerHTML = `<h4>Coefficient of Variation (COV)</h4>`;
+        stocks.forEach((stock, index) => {
+            resultsContainer.innerHTML += `<div>${stock.symbol}: ${covResults[index][0]?.cov || 'N/A'}</div>`;
+        });
+
+        resultsContainer.innerHTML += `<h4>Beta Coefficient</h4>`;
+        stocks.forEach((stock, index) => {
+            resultsContainer.innerHTML += `<div>${stock.symbol}: ${betaResults[index][0]?.beta || 'N/A'}</div>`;
+        });
+
+        resultsContainer.innerHTML += `<h4>Covariance Matrix</h4>`;
+        if (covMatrix.length > 0) {
+            const symbols = stocks.map(stock => stock.symbol);
+            let matrixHTML = '<table border="1" style="border-collapse: collapse; text-align: center;">';
+            matrixHTML += '<tr><th></th>' + symbols.map(symbol => `<th>${symbol}</th>`).join('') + '</tr>';
+            covMatrix.forEach((row, rowIndex) => {
+                matrixHTML += `<tr><th>${symbols[rowIndex]}</th>` + row.map(cell => `<td>${cell[0].toFixed(2)}</td>`).join('') + '</tr>';
+            });
+            matrixHTML += '</table>';
+            resultsContainer.innerHTML += matrixHTML;
+        } else {
+            resultsContainer.innerHTML += `<div>No covariance matrix available</div>`;
+        }
+    } catch (error) {
+        console.error('Error fetching portfolio stats:', error);
+        container.innerHTML += `<div>Error fetching portfolio stats</div>`;
+    }
 }
 
 // Update the displayed cash value
