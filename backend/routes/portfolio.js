@@ -1,6 +1,7 @@
 import express from "express";
-import { pool } from '../server.js'
-import { usersPortfolio } from '../services/portfolioServices.js'
+import { pool } from '../server.js';
+import { usersPortfolio } from '../services/portfolioServices.js';
+import { computeCov } from "../services/stockServices.js";
 
 const router = express.Router();
 export default router;
@@ -21,7 +22,7 @@ router.post('/', async (req, res) => {
 router.get('/', async (req, res) => {
     const uid = req.session.uid;
     const output = await pool.query(
-        `SELECT pid, pname
+        `SELECT pid, pname, cash
         FROM portfolios
         WHERE uid = $1`,
         [uid]
@@ -31,7 +32,7 @@ router.get('/', async (req, res) => {
 });
 
 // display stock holdings of a particular portfolio
-router.get('/:pid', async (req, res) => {
+router.get('/pid/:pid', async (req, res) => {
     const uid = req.session.uid;
     const pid = req.params.pid;
     
@@ -40,13 +41,21 @@ router.get('/:pid', async (req, res) => {
         res.status(400).json({error: "Invalid portfolio"});
         return;
     };
-    
+
+    // get present value of portfolio
     const output = await pool.query(
-        `SELECT stocks.symbol, quantity, quantity * curr_val AS total_value
-        FROM in_port JOIN stocks ON in_port.symbol = stocks.symbol
-        WHERE pid = $1`,
+        `WITH present_value AS (
+            SELECT s.symbol, quantity, (p.quantity * s.curr_val) AS total_value
+            FROM stocks s JOIN in_port p ON s.symbol = p.symbol
+            WHERE p.pid = $1
+        )
+        (SELECT * FROM present_value)
+        UNION
+        (SELECT 'Portfolio Total' AS symbol, SUM(quantity) AS quantity, SUM(total_value) AS total_value
+        FROM present_value)`,
         [pid]
     );
+
     res.status(200).json(output.rows);
 });
 
@@ -135,17 +144,112 @@ router.post('/withdraw', async (req, res) => {
     };
 });
 
+// transfer cash between portfolios
+router.post('/transfer', async (req, res) => {
+    const uid = req.session.uid;
+    const to = req.body.to;
+    const from = req.body.from;
+    const amount = req.body.amount;
+
+    // check if the given portfolios belong to the user
+    if (!(await usersPortfolio(uid, to)) || !(await usersPortfolio(uid, from))) {
+        res.status(400).json({error: "Invalid portfolio"});
+        return;
+    };
+
+    // check if amount can be deducted from "from" portfolio
+    let from_cash = await pool.query(
+        `SELECT cash
+        FROM portfolios
+        WHERE pid = $1`,
+        [from]
+    );
+    from_cash = from_cash.rows.map(row => row.cash)[0];
+    if (from_cash - amount < 0) {
+        res.status(400).json({error: "Invalid amount"});
+        return;
+    };
+
+    // transfer cash
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+
+        await client.query(
+            `UPDATE portfolios
+            SET cash = (cash - $2)
+            WHERE pid = $1`,
+            [from, amount]
+        );
+
+        await client.query(
+            `UPDATE portfolios
+            SET cash = (cash + $2)
+            WHERE pid = $1`,
+            [to, amount]
+        );
+
+        await client.query("COMMIT");
+        res.status(200).json({message: "Cash successfully transferred"});
+    } catch (error) {
+        await client.query("ROLLBACK");
+        res.status(500).json({error: "Transfer failed"});
+    } finally {
+        client.release();
+    };
+});
+
+// display bought stocks
+router.get('/bought/:pid', async (req, res) => {
+    const uid = req.session.uid;
+    const pid = req.params.pid;
+
+    // check if the given portfolio belongs to user
+    if (!(await usersPortfolio(uid, pid))) {
+        res.status(400).json({error: "Invalid portfolio"});
+        return;
+    };
+
+    const output = await pool.query(
+        `SELECT symbol, timestamp, (quantity * unit_price) AS total_value
+        FROM bought
+        WHERE pid = $1`,
+        [pid]
+    );
+
+    res.status(500).json(output.rows);
+});
+
+// display sold stocks
+router.get('/sold/:pid', async (req, res) => {
+    const uid = req.session.uid;
+    const pid = req.params.pid;
+
+    // check if the given portfolio belongs to user
+    if (!(await usersPortfolio(uid, pid))) {
+        res.status(400).json({error: "Invalid portfolio"});
+        return;
+    };
+
+    const output = await pool.query(
+        `SELECT symbol, timestamp, (quantity * unit_price) AS total_value
+        FROM sold
+        WHERE pid = $1`,
+        [pid]
+    );
+
+    res.status(500).json(output.rows);
+});
+
 // buy stock
 router.post('/buy', async (req, res) => {
     const uid = req.session.uid;
     const pid = req.body.pid;
     const symbol = req.body.symbol;
     const quantity = req.body.quantity;
-    console.log(pid);
     
     // check if the given portfolio belongs to user
     const poo = await usersPortfolio(uid, pid);
-    console.log(poo);
     if (!(await usersPortfolio(uid, pid))) {
         res.status(400).json({error: "Invalid portfolio"});
         return;
@@ -320,4 +424,46 @@ router.post('/sell', async (req, res) => {
     } finally {
         client.release();
     }
+});
+
+// compute covariance matrix of given portfolio for the given timestamp
+router.post('/cov', async (req, res) => {
+    const uid = req.session.uid;
+    const pid = req.body.pid;
+    const start_date = req.body.start_date;
+    const end_date = req.body.end_date;
+
+    // check if the given portfolio belongs to user
+    if (!(await usersPortfolio(uid, pid))) {
+        res.status(400).json({error: "Invalid portfolio"});
+        return;
+    };
+
+    // get list of stocks in portfolio
+    let stocks = await pool.query(
+        `SELECT symbol
+        FROM in_port
+        WHERE pid = $1`,
+        [pid]
+    );
+    
+    // check if there are any stocks in the portfolio
+    if (stocks.rows.length === 0) {
+        res.status(400).json({error: "Must have at least one stock in portfolio"});
+        return;
+    }
+    stocks = stocks.rows.map(row => row.symbol);
+
+    let cov_mat = new Array(stocks.length);
+    for (let k = 0; k < cov_mat.length; k++) {
+        cov_mat[k] = new Array(stocks.length);
+    };
+
+    for (let i = 0; i < stocks.length; i++) {
+        for (let j = 0; j < stocks.length; j++) {
+            cov_mat[i][j] = [await computeCov(stocks[i], stocks[j], start_date, end_date), stocks[i], stocks[j]];
+        };
+    };
+
+    res.status(500).json(cov_mat);
 });

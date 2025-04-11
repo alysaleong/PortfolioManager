@@ -153,27 +153,19 @@ router.post('/symbol/:symbol', async (req, res) => {
     try {
         await client.query('BEGIN');
 
-        await client.query(
-            `CREATE VIEW stock_data AS (
-                (SELECT NOW() AS timestamp, curr_val AS price 
-                FROM stocks 
-                WHERE symbol = '${symbol}') 
-                UNION 
-                (SELECT timestamp, close AS price 
-                FROM hist_stock_data 
-                WHERE symbol = '${symbol}')
-            )`
-        );
-
         const output = await client.query(
             `SELECT *
-            FROM stock_data
+            FROM (
+                (SELECT now() AS timestamp, curr_val AS price 
+                FROM stocks 
+                WHERE symbol = $2) 
+                UNION
+                (SELECT timestamp, close AS price 
+                FROM hist_stock_data 
+                WHERE symbol = $2)
+                )
             WHERE timestamp >= $1`,
-            [timestamp]
-        );
-    
-        await client.query(
-            `DROP VIEW stock_data`
+            [timestamp, symbol]
         );
 
         await client.query("COMMIT");
@@ -185,6 +177,40 @@ router.post('/symbol/:symbol', async (req, res) => {
     } finally {
         client.release();
     };
+});
+
+// predict future stock performance for the given timestamp
+router.post('/symbol/:symbol/future', async (req, res) => {
+    const symbol = req.params.symbol;
+    const timestamp = req.body.timestamp;
+
+    // check if stock is in historical data
+    const stocks = await pool.query(
+        `SELECT symbol
+        FROM hist_stock_data
+        WHERE symbol = $1`,
+        [symbol]
+    );
+    if (stocks.rows.length === 0) {
+        res.status(400).json({error: "No available data to predict"});
+        return;
+    }
+    
+    const output = await pool.query(
+        `WITH data AS  
+            (SELECT (timestamp - '1970-01-01'::date) AS time, close
+            FROM hist_stock_data
+            WHERE symbol = $1)
+        SELECT regr_slope(close, time) AS slope, regr_intercept(close, time) AS intercept
+        FROM data`,
+        [symbol]
+    );
+    const slope = output.rows.map(row => row.slope)[0];
+    const intercept = output.rows.map(row => row.intercept)[0];
+
+    const prediction = slope * Date.parse(timestamp) / 86400000 + intercept; // convert milliseconds to days
+    
+    res.status(500).json({message: `The predicted stock price for ${symbol} on ${timestamp} is ${prediction}`, "prediction": `${prediction}`});
 });
 
 // compute COV of the given stock for the given time interval
@@ -228,7 +254,7 @@ router.post('/symbol/:symbol/cov', async (req, res) => {
                 GROUP BY symbol`,
                 [symbol, start_date, end_date]
             );
-            cov = cov.rows.map(row => row.cov)[0];
+            cov = Number(cov.rows.map(row => row.cov)[0]);
 
             if (cov == null) {
                 cov = "No data available";
@@ -241,6 +267,11 @@ router.post('/symbol/:symbol/cov', async (req, res) => {
                     [symbol, cov, start_date, end_date]
                 );
             };
+        } else {
+            request.rows = request.rows.map(row => {
+                row.cov = Number(row.cov);
+                return row;
+            });
         };
 
         await client.query("COMMIT");
@@ -292,13 +323,13 @@ router.post('/symbol/:symbol/beta', async (req, res) => {
         await client.query('BEGIN');
 
         // check if requested data is cached
-        const request = await client.query(
+        let request = await client.query(
             `SELECT beta
             FROM beta_cache
             WHERE symbol = $1 AND start_date = $2 AND end_date = $3`,
             [symbol, start_date, end_date]
         );
-
+        
         let output = {};
         let cached = true;
         if (request.rows.length === 0) {
@@ -323,6 +354,11 @@ router.post('/symbol/:symbol/beta', async (req, res) => {
                     [symbol, beta, start_date, end_date]
                 );
             };
+        } else {
+            request.rows = request.rows.map(row => {
+                row.beta = Number(row.beta);
+                return row;
+            });
         };
 
         await client.query("COMMIT");
