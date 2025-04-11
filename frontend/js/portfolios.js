@@ -82,9 +82,9 @@ async function selectPortfolio(pid) {
         <h3>Portfolio Statistics</h3>
         <form id="portfolio-stats-form">
             <label for="start-date">Start Date:</label>
-            <input type="date" id="start-date" required>
+            <input type="date" id="start-date2" required>
             <label for="end-date">End Date:</label>
-            <input type="date" class="end-date" required>
+            <input type="date" id="end-date2" required>
             <button type="submit">Get Statistics</button>
         </form>
         <div id="portfolio-stats-results"></div>
@@ -93,8 +93,8 @@ async function selectPortfolio(pid) {
     // Add event listener for the portfolio stats form
     document.getElementById('portfolio-stats-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const startDate = document.getElementById('start-date').value;
-        const endDate = document.getElementsByClassName('end-date')[0].value;
+        const startDate = document.getElementById('start-date2').value;
+        const endDate = document.getElementById('end-date2').value;
 
         if (!selectedPortfolioId) {
             alert('Please select a portfolio first.');

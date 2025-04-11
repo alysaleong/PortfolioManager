@@ -42,7 +42,7 @@ async function selectStockList(slid) {
     const stockListDetails = await sendRequest(`/stocklists/${slid}`);
     const stockListDetailsContainer = document.getElementById('stocklist-details');
     const stocksContainer = document.getElementById('stocks-in-list-container');
-    const addStockForm = document.getElementById('add-stock-form');
+    const addStockForm = document.getElementById('stocklist-add-stock-form');
     const stockListStatsContainer = document.getElementById('stocklist-stats-container');
 
     // display stock list details
@@ -102,9 +102,9 @@ async function selectStockList(slid) {
         <h3>Stock List Statistics</h3>
         <form id="stocklist-stats-form">
             <label for="start-date">Start Date:</label>
-            <input type="date" id="start-date" required>
+            <input type="date" id="start-date1" required>
             <label for="end-date">End Date:</label>
-            <input type="date" class="end-date" required>
+            <input type="date" id="end-date1" required>
             <button type="submit">Get Statistics</button>
         </form>
         <div id="stocklist-stats-results"></div>
@@ -113,8 +113,8 @@ async function selectStockList(slid) {
     // add event listener for the stock list stats form
     document.getElementById('stocklist-stats-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const startDate = document.getElementById('start-date').value;
-        const endDate = document.getElementsByClassName('end-date')[0].value;
+        const startDate = document.getElementById('start-date1').value;
+        const endDate = document.getElementById('end-date1').value;
 
         if (!selectedStockListId) {
             alert('Please select a stock list first.');
@@ -182,7 +182,7 @@ async function displayStockListStats(stocks, container, startDate, endDate) {
 }
 
 // add a stock to the selected stock list
-document.getElementById('add-stock-form').addEventListener('submit', async (e) => {
+document.getElementById('stocklist-add-stock-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!selectedStockListId) {
         alert('Please select a stock list first.');

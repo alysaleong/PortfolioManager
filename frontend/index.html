@@ -98,7 +98,7 @@
                     <div id="stocks-in-list-container" class="sub-content-section" style="display: none;">
                         <!-- <h3>Stocks in Selected List</h3> -->
                     </div>
-                    <form id="add-stock-form" class="sub-content-section" style="display: none;">
+                    <form id="stocklist-add-stock-form" class="sub-content-section" style="display: none;">
                         <h3>Add Stock</h3>
                         <input type="text" name="symbol" placeholder="Stock Symbol" required>
                         <input type="number" name="quantity" placeholder="Quantity" required>
@@ -109,9 +109,9 @@
                     <h3>Stock List Statistics</h3>
                     <form id="stocklist-stats-form">
                         <label for="start-date">Start Date:</label>
-                        <input type="date" id="start-date" name="start-date" required>
+                        <input type="date" id="start-date1" name="start-date" required>
                         <label for="end-date">End Date:</label>
-                        <input type="date" class="end-date" name="end-date" required>
+                        <input type="date" id="end-date1" name="end-date" required>
                         <button type="submit">Generate Statistics</button>
                     </form>
                     <div id="stocklist-stats-results">
@@ -192,9 +192,9 @@
                     <h3>Portfolio Statistics</h3>
                     <form id="portfolio-stats-form">
                         <label for="start-date">Start Date:</label>
-                        <input type="date" id="start-date" name="start-date" required>
+                        <input type="date" id="start-date2" name="start-date" required>
                         <label for="end-date">End Date:</label>
-                        <input type="date" class="end-date" name="end-date" required>
+                        <input type="date" id="end-date2" name="end-date" required>
                         <button type="submit">Generate Statistics</button>
                     </form>
                     <div id="portfolio-stats-results">
