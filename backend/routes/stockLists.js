@@ -3,6 +3,7 @@ import express from "express";
 import { pool } from "../server.js";
 import { is_stocklist_owned_by } from "../services/stocklistServices.js";
 import { can_review } from "../services/friendsServices.js";
+import { computeCov } from "../services/stockServices.js";
 
 const router = express.Router();
 
@@ -282,7 +283,7 @@ router.delete('/:slid', async (req, res) => {
 // compute covariance matrix of given portfolio for the given timestamp
 router.post('/cov', async (req, res) => {
     const uid = req.session.uid;
-    const slid = req.body.SLid;
+    const slid = req.body.slid;
     const start_date = req.body.start_date;
     const end_date = req.body.end_date;
 

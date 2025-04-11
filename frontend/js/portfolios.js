@@ -84,7 +84,7 @@ async function selectPortfolio(pid) {
             <label for="start-date">Start Date:</label>
             <input type="date" id="start-date" required>
             <label for="end-date">End Date:</label>
-            <input type="date" id="end-date" required>
+            <input type="date" class="end-date" required>
             <button type="submit">Get Statistics</button>
         </form>
         <div id="portfolio-stats-results"></div>
@@ -94,7 +94,7 @@ async function selectPortfolio(pid) {
     document.getElementById('portfolio-stats-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const startDate = document.getElementById('start-date').value;
-        const endDate = document.getElementById('end-date').value;
+        const endDate = document.getElementsByClassName('end-date')[0].value;
 
         if (!selectedPortfolioId) {
             alert('Please select a portfolio first.');

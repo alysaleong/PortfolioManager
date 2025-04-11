@@ -43,6 +43,7 @@ async function selectStockList(slid) {
     const stockListDetailsContainer = document.getElementById('stocklist-details');
     const stocksContainer = document.getElementById('stocks-in-list-container');
     const addStockForm = document.getElementById('add-stock-form');
+    const stockListStatsContainer = document.getElementById('stocklist-stats-container');
 
     // display stock list details
     stockListDetailsContainer.style.display = 'block';
@@ -94,6 +95,90 @@ async function selectStockList(slid) {
         <input type="number" name="quantity" placeholder="Quantity" required>
         <button type="submit">Add Stock</button>
     `;
+
+    // display stock list stats
+    stockListStatsContainer.style.display = 'block';
+    stockListStatsContainer.innerHTML = `
+        <h3>Stock List Statistics</h3>
+        <form id="stocklist-stats-form">
+            <label for="start-date">Start Date:</label>
+            <input type="date" id="start-date" required>
+            <label for="end-date">End Date:</label>
+            <input type="date" class="end-date" required>
+            <button type="submit">Get Statistics</button>
+        </form>
+        <div id="stocklist-stats-results"></div>
+    `;
+
+    // add event listener for the stock list stats form
+    document.getElementById('stocklist-stats-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const startDate = document.getElementById('start-date').value;
+        const endDate = document.getElementsByClassName('end-date')[0].value;
+
+        if (!selectedStockListId) {
+            alert('Please select a stock list first.');
+            return;
+        }
+
+        const stockListDetails = await sendRequest(`/stocklists/${selectedStockListId}`);
+        const stocks = stockListDetails.stocks;
+        const stockListStatsContainer = document.getElementById('stocklist-stats-container');
+        await displayStockListStats(stocks, stockListStatsContainer, startDate, endDate);
+    });
+}
+
+// display stock list statistics
+async function displayStockListStats(stocks, container, startDate, endDate) {
+    try {
+        const covPromises = stocks.map(stock => sendRequest(`/stocks/symbol/${stock.symbol}/cov`, 'POST', {
+            start_date: startDate,
+            end_date: endDate
+        }));
+        const betaPromises = stocks.map(stock => sendRequest(`/stocks/symbol/${stock.symbol}/beta`, 'POST', {
+            start_date: startDate,
+            end_date: endDate
+        }));
+        const covMatrixPromise = sendRequest('/stocklists/cov', 'POST', {
+            slid: selectedStockListId,
+            start_date: startDate,
+            end_date: endDate
+        });
+
+        const covResults = await Promise.all(covPromises);
+        const betaResults = await Promise.all(betaPromises);
+        const covMatrix = await covMatrixPromise;
+
+        console.log('Covariance mat:', covMatrix);
+
+        const resultsContainer = document.getElementById('stocklist-stats-results');
+        resultsContainer.innerHTML = `<h4>Coefficient of Variation (COV)</h4>`;
+        stocks.forEach((stock, index) => {
+            resultsContainer.innerHTML += `<div>${stock.symbol}: ${covResults[index][0]?.cov || 'N/A'}</div>`;
+        });
+
+        resultsContainer.innerHTML += `<h4>Beta Coefficient</h4>`;
+        stocks.forEach((stock, index) => {
+            resultsContainer.innerHTML += `<div>${stock.symbol}: ${betaResults[index][0]?.beta || 'N/A'}</div>`;
+        });
+
+        resultsContainer.innerHTML += `<h4>Covariance Matrix</h4>`;
+        if (covMatrix.length > 0) {
+            const symbols = stocks.map(stock => stock.symbol);
+            let matrixHTML = '<table border="1" style="border-collapse: collapse; text-align: center;">';
+            matrixHTML += '<tr><th></th>' + symbols.map(symbol => `<th>${symbol}</th>`).join('') + '</tr>';
+            covMatrix.forEach((row, rowIndex) => {
+                matrixHTML += `<tr><th>${symbols[rowIndex]}</th>` + row.map(cell => `<td>${cell[0].toFixed(2)}</td>`).join('') + '</tr>';
+            });
+            matrixHTML += '</table>';
+            resultsContainer.innerHTML += matrixHTML;
+        } else {
+            resultsContainer.innerHTML += `<div>No covariance matrix available</div>`;
+        }
+    } catch (error) {
+        console.error('Error fetching stock list stats:', error);
+        container.innerHTML += `<div>Error fetching stock list stats</div>`;
+    }
 }
 
 // add a stock to the selected stock list

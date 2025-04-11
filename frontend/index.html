@@ -102,6 +102,19 @@
                         <button type="submit">Add Stock</button>
                     </form>
                 </div>
+                <div id="stocklist-stats-container" class="sub-content-section" style="display: none;">
+                    <h3>Stock List Statistics</h3>
+                    <form id="stocklist-stats-form">
+                        <label for="start-date">Start Date:</label>
+                        <input type="date" id="start-date" name="start-date" required>
+                        <label for="end-date">End Date:</label>
+                        <input type="date" class="end-date" name="end-date" required>
+                        <button type="submit">Generate Statistics</button>
+                    </form>
+                    <div id="stocklist-stats-results">
+                        <!-- Stock list statistics will be dynamically populated here -->
+                    </div>
+                </div>
             </section>
 
             <section id="review-content" class="content-section" style="display: none;">
@@ -178,7 +191,7 @@
                         <label for="start-date">Start Date:</label>
                         <input type="date" id="start-date" name="start-date" required>
                         <label for="end-date">End Date:</label>
-                        <input type="date" id="end-date" name="end-date" required>
+                        <input type="date" class="end-date" name="end-date" required>
                         <button type="submit">Generate Statistics</button>
                     </form>
                     <div id="portfolio-stats-results">
