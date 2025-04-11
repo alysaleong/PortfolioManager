@@ -40,6 +40,7 @@ async function loadPublicLists() {
             selectedStockListId = e.target.dataset.slid;
             await loadStockListDetails(selectedStockListId); // Load stocks in the stock list
             document.getElementById('write-review-form').style.display = 'block';
+            await prefillReviewForm(selectedStockListId); // Pre-fill the form with the existing review
         });
     });
 }
@@ -80,6 +81,7 @@ async function loadReviewingLists() {
             selectedStockListId = e.target.dataset.slid;
             await loadStockListDetails(selectedStockListId); // Load stocks in the stock list
             document.getElementById('write-review-form').style.display = 'block';
+            await prefillReviewForm(selectedStockListId); // Pre-fill the form with the existing review
         });
     });
 }
@@ -102,6 +104,24 @@ async function loadStockListDetails(slid) {
         stockListDetailsContainer.appendChild(stockEl);
     });
     stockListDetailsContainer.style.display = 'block';
+}
+
+// Pre-fill the review form with the existing review if available
+async function prefillReviewForm(slid) {
+    try {
+        // Fetch the user's UID from the /me endpoint
+        const user = await sendRequest('/me');
+        const uid = user.uid;
+
+        // Fetch the existing review using the UID
+        const existingReview = await sendRequest(`/reviews/${slid}/users/${uid}`, 'GET');
+        if (existingReview && existingReview.review !== undefined) {
+            const reviewForm = document.getElementById('write-review-form');
+            reviewForm.querySelector('textarea[name="review"]').value = existingReview.review;
+        }
+    } catch (error) {
+        console.log("No existing review found or error fetching review:", error);
+    }
 }
 
 // Handle toggles for public and reviewing lists
@@ -148,8 +168,25 @@ document.getElementById('write-review-form').addEventListener('submit', async (e
     }
     const formData = new FormData(e.target);
     const body = Object.fromEntries(formData.entries());
-    const result = await sendRequest(`/reviews/${selectedStockListId}`, 'POST', body);
-    alert(JSON.stringify(result.message || result.error));
+
+    try {
+        // Try to fetch the existing review
+        // Fetch the user's UID from the /me endpoint
+        const user = await sendRequest('/me');
+        const uid = user.uid;
+
+        const existingReview = await sendRequest(`/reviews/${selectedStockListId}/users/${uid}`, 'GET');
+        if (existingReview && existingReview.review !== undefined) {
+            // If a review exists, send a PATCH request to update it
+            const result = await sendRequest(`/reviews/${selectedStockListId}`, 'PATCH', body);
+            alert(JSON.stringify(result.message || result.error));
+        }
+    } catch (error) {
+        // If no review exists, send a POST request to create it
+        const result = await sendRequest(`/reviews/${selectedStockListId}`, 'POST', body);
+        alert(JSON.stringify(result.message || result.error));
+    }
+
     document.getElementById('write-review-form').style.display = 'none';
     document.getElementById('review-stocks-container').style.display = 'none'; // Hide stocks after submission
 });

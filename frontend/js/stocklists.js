@@ -14,9 +14,25 @@ export async function loadStockLists() {
         stockListEl.innerHTML = `
             <button class="stocklist-name">${stockList.slid}: ${stockList.slname}</button>
             <div class="stocklist-public">${stockList.public ? 'Public' : 'Private'}</div>
+            <button class="delete-stocklist-button" data-slid="${stockList.slid}">Delete</button>
         `;
         stockListEl.addEventListener('click', () => selectStockList(stockList.slid));
         stockListsContainer.appendChild(stockListEl);
+    });
+
+    // Add event listeners to delete stock list buttons
+    const deleteButtons = document.querySelectorAll('.delete-stocklist-button');
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', async (e) => {
+            e.stopPropagation(); // Prevent triggering the stock list selection
+            const slid = e.target.dataset.slid;
+            const confirmDelete = confirm(`Are you sure you want to delete stock list ${slid}?`);
+            if (confirmDelete) {
+                const result = await sendRequest(`/stocklists/${slid}`, 'DELETE');
+                alert(JSON.stringify(result.message || result.error));
+                await loadStockLists(); // Reload stock lists after deletion
+            }
+        });
     });
 }
 
