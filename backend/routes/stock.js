@@ -154,17 +154,13 @@ router.post('/symbol/:symbol', async (req, res) => {
         await client.query('BEGIN');
 
         const output = await client.query(
-            `SELECT *
-            FROM (
-                (SELECT now() AS timestamp, curr_val AS price 
-                FROM stocks 
-                WHERE symbol = $2) 
+            `(SELECT CURRENT_DATE AS timestamp, curr_val AS price 
+            FROM stocks 
+            WHERE symbol = $2) 
                 UNION
-                (SELECT timestamp, close AS price 
-                FROM hist_stock_data 
-                WHERE symbol = $2)
-                )
-            WHERE timestamp >= $1`,
+            (SELECT timestamp, close AS price 
+            FROM hist_stock_data 
+            WHERE symbol = $2 AND timestamp >= $1)`,
             [timestamp, symbol]
         );
 
@@ -184,6 +180,14 @@ router.post('/symbol/:symbol/future', async (req, res) => {
     const symbol = req.params.symbol;
     const timestamp = req.body.timestamp;
 
+    // find number of days timestamp is from today
+    let days = (Date.parse(timestamp) - Date.now()) / 86400000;
+    if (days < 0) {
+        res.status(400).json({error: "Please provide a date in the future"});
+        return;
+    }
+    days = Math.ceil(days);
+    
     // check if stock is in historical data
     const stocks = await pool.query(
         `SELECT symbol
@@ -196,6 +200,7 @@ router.post('/symbol/:symbol/future', async (req, res) => {
         return;
     }
     
+    // compute regression coefficients
     const output = await pool.query(
         `WITH data AS  
             (SELECT (timestamp - '1970-01-01'::date) AS time, close
@@ -207,10 +212,18 @@ router.post('/symbol/:symbol/future', async (req, res) => {
     );
     const slope = output.rows.map(row => row.slope)[0];
     const intercept = output.rows.map(row => row.intercept)[0];
-
-    const prediction = slope * Date.parse(timestamp) / 86400000 + intercept; // convert milliseconds to days
     
-    res.status(500).json({message: `The predicted stock price for ${symbol} on ${timestamp} is ${prediction}`, "prediction": `${prediction}`});
+    // compute predictions over next given days
+    let prediction = [];
+    for (let i = 0; i < days; i++) {
+        let time = (Date.now() / 86400000) + i + 1; // division converts to number of days
+        let value = slope * time + intercept;
+        time = new Date(time * 86400000).toISOString().substring(0, 10);
+        prediction.push([time, value]);
+    };
+    
+    res.status(500).json(prediction);
+    // res.status(500).json({message: `The predicted stock price for ${symbol} on ${timestamp} is ${prediction}`, "prediction": `${prediction}`});
 });
 
 // compute COV of the given stock for the given time interval
