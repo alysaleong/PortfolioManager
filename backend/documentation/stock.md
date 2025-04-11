@@ -26,6 +26,26 @@
 ]
 ```
 
+### Compute future stock prices given the future date
+#### req: POST http://localhost:4000/api/stocks/symbol/AAPL/future
+#### res:
+```
+[
+    {
+        "timestamp": "2025-04-12",
+        "price": 111.16495393967776
+    },
+    {
+        "timestamp": "2025-04-13",
+        "price": 111.16780228672096
+    },
+    {
+        "timestamp": "2025-04-14",
+        "price": 111.17065063376418
+    }
+]
+```
+
 ### Compute COV of the given stock for the given time interval
 #### req: POST http://localhost:4000/api/stocks/symbol/:symbol/cov
 #### res:
