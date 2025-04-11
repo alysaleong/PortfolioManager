@@ -53,16 +53,18 @@ async function loadReviewingLists() {
     const reviewingListsContainer = document.getElementById('reviewing-lists-container');
     reviewingListsContainer.innerHTML = '<h3>Lists I\'m Reviewing</h3>'; // Clear the container
     const reviewingLists = await sendRequest('/stocklists/reviewing');
-    reviewingLists.forEach(list => {
+    for (const list of reviewingLists) {
+        // Fetch the owner's email for each stock list
+        const ownerEmail = await sendRequest(`/users/uid/${list.uid}/email`);
         const listEl = document.createElement('div');
         listEl.classList.add('stocklist-item');
         listEl.innerHTML = `
-            <div class="stocklist-name">${list.slname}</div>
+            <div class="stocklist-name">${list.slname} (Owner: ${ownerEmail.email})</div>
             <button class="write-review-button" data-slid="${list.slid}">Write Review</button>
             <button class="delete-review-button" data-slid="${list.slid}">Delete Review</button>
         `;
         reviewingListsContainer.appendChild(listEl);
-    });
+    }
 
     // Add event listeners for "Write Review" buttons
     const writeReviewButtons = document.querySelectorAll('.write-review-button');

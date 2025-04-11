@@ -23,7 +23,7 @@ router.get('/', async (req, res) => {
 router.get('/reviewing', async (req, res) => {
     const uid = req.session.uid;
     const stock_lists = await pool.query(
-        `SELECT slid, slname, public FROM stock_lists 
+        `SELECT uid, slid, slname, public FROM stock_lists 
         WHERE slid IN (SELECT slid FROM reviews WHERE uid = $1)`,
         [uid]
     );
