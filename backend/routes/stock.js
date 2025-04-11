@@ -219,11 +219,10 @@ router.post('/symbol/:symbol/future', async (req, res) => {
         let time = (Date.now() / 86400000) + i + 1; // division converts to number of days
         let value = slope * time + intercept;
         time = new Date(time * 86400000).toISOString().substring(0, 10);
-        prediction.push([time, value]);
+        prediction.push({"timestamp": time, "price": value});
     };
     
     res.status(500).json(prediction);
-    // res.status(500).json({message: `The predicted stock price for ${symbol} on ${timestamp} is ${prediction}`, "prediction": `${prediction}`});
 });
 
 // compute COV of the given stock for the given time interval
