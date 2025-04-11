@@ -5,30 +5,31 @@ let selectedStockListId = null;
 // Load public stock lists
 async function loadPublicLists() {
     const targetSection = document.getElementById("review-content");
-    targetSection.style.display = 'block'; 
+    targetSection.style.display = 'block';
 
     const publicListsContainer = document.getElementById('public-lists-container');
     publicListsContainer.innerHTML = '<h3>Public Stock Lists</h3>'; // Clear the container
-    const publicLists = await sendRequest('/stocklists');
+    const publicLists = await sendRequest('/stocklists/public');
     publicLists.forEach(list => {
         if (list.public) {
             const listEl = document.createElement('div');
             listEl.classList.add('stocklist-item');
             listEl.innerHTML = `
                 <div class="stocklist-name">${list.slname}</div>
+                <button class="view-reviews-button" data-slid="${list.slid}">View Reviews</button>
                 <button class="write-review-button" data-slid="${list.slid}">Write Review</button>
             `;
             publicListsContainer.appendChild(listEl);
         }
     });
 
-    // Add event listeners for "View Stocks" buttons
-    const viewStocksButtons = document.querySelectorAll('.view-stocks-button');
-    viewStocksButtons.forEach(button => {
+    // Add event listeners for "View Reviews" buttons
+    const viewReviewsButtons = document.querySelectorAll('.view-reviews-button');
+    viewReviewsButtons.forEach(button => {
         button.addEventListener('click', async (e) => {
             e.preventDefault();
             const slid = e.target.dataset.slid;
-            await loadStockListDetails(slid);
+            await loadStockListDetails(slid, true); // Load stocks and reviews for the selected stock list
         });
     });
 
@@ -38,9 +39,7 @@ async function loadPublicLists() {
         button.addEventListener('click', async (e) => {
             e.preventDefault(); // Prevent default behavior
             selectedStockListId = e.target.dataset.slid;
-            await loadStockListDetails(selectedStockListId); // Load stocks in the stock list
-            document.getElementById('write-review-form').style.display = 'block';
-            await prefillReviewForm(selectedStockListId); // Pre-fill the form with the existing review
+            await loadStockListDetails(selectedStockListId, false); // Load stocks and show the review form
         });
     });
 }
@@ -72,9 +71,7 @@ async function loadReviewingLists() {
         button.addEventListener('click', async (e) => {
             e.preventDefault(); // Prevent default behavior
             selectedStockListId = e.target.dataset.slid;
-            await loadStockListDetails(selectedStockListId); // Load stocks in the stock list
-            document.getElementById('write-review-form').style.display = 'block';
-            await prefillReviewForm(selectedStockListId); // Pre-fill the form with the existing review
+            await loadStockListDetails(selectedStockListId, false); // Load stocks and show the review form
         });
     });
 
@@ -94,10 +91,14 @@ async function loadReviewingLists() {
     });
 }
 
-// Load stock list details for viewing
-async function loadStockListDetails(slid) {
+// Load stock list details for viewing, including stocks and reviews
+async function loadStockListDetails(slid, isViewMode) {
     const stockListDetails = await sendRequest(`/stocklists/${slid}`);
     const stockListDetailsContainer = document.getElementById('review-stocks-container');
+    const stockListReviewsContainer = document.getElementById('public-stocklist-reviews-container');
+    const writeReviewForm = document.getElementById('write-review-form');
+
+    // Display stocks in the stock list
     stockListDetailsContainer.innerHTML = `
         <h3>Stocks in ${stockListDetails.slname}</h3>
     `;
@@ -112,6 +113,38 @@ async function loadStockListDetails(slid) {
         stockListDetailsContainer.appendChild(stockEl);
     });
     stockListDetailsContainer.style.display = 'block';
+
+    if (isViewMode) {
+        // Load and display reviews for the stock list
+        try {
+            const reviews = await sendRequest(`/reviews/${slid}`);
+            if (reviews.length === 0) {
+                stockListReviewsContainer.innerHTML = '<div>No reviews available for this stock list.</div>';
+            } else {
+                let reviewsHTML = '<h3>Reviews</h3>';
+                for (const review of reviews) {
+                    const userEmail = await sendRequest(`/users/uid/${review.uid}/email`);
+                    reviewsHTML += `
+                        <div class="review-item">
+                            <div><strong>User:</strong> ${userEmail.email}</div>
+                            <div><strong>Review:</strong> ${review.review || 'No review text provided'}</div>
+                        </div>
+                    `;
+                }
+                stockListReviewsContainer.innerHTML = reviewsHTML;
+            }
+        } catch (error) {
+            console.error('Error loading reviews:', error);
+            stockListReviewsContainer.innerHTML = '<div>Error loading reviews.</div>';
+        }
+        stockListReviewsContainer.style.display = 'block';
+        writeReviewForm.style.display = 'none'; // Hide the review form
+    } else {
+        // Show the review form for writing/editing a review
+        writeReviewForm.style.display = 'block';
+        stockListReviewsContainer.style.display = 'none'; // Hide the reviews section
+        await prefillReviewForm(slid); // Pre-fill the form with the existing review
+    }
 }
 
 // Pre-fill the review form with the existing review if available

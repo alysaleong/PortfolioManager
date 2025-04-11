@@ -32,6 +32,16 @@ router.get('/reviewing', async (req, res) => {
 });
 
 // TODO: get public stocklists ids
+router.get('/public', async (req, res) => {
+    const uid = req.session.uid;
+    const stock_lists = await pool.query(
+        `SELECT slid, slname, public FROM stock_lists
+        WHERE public = true AND slid NOT IN (SELECT slid FROM stock_lists WHERE uid = $1)`,
+        [uid]
+    );
+
+    res.status(200).json(stock_lists.rows);
+});
 
 // get stock list by slid and include stocks in it
 // TODO: public can be viewed by anyone 
@@ -76,9 +86,6 @@ router.get('/:slid', async (req, res) => {
 
     res.status(200).json(stock_list_with_stocks);
 });
-
-
-// TODO: get stock list stats
 
 // create stock list
 router.post('/', async (req, res) => {
