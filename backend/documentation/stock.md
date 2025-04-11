@@ -48,13 +48,3 @@
 ]
 ```
 
-### Compute covariance of the given stocks for the given time interval
-#### req: POST http://localhost:4000/api/stocks/cov
-#### res:
-```
-[
-    {
-        "cov": -1.1132959633540298e-15
-    }
-]
-```
