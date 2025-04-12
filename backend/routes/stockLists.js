@@ -31,7 +31,7 @@ router.get('/reviewing', async (req, res) => {
     res.status(200).json(stock_lists.rows);
 });
 
-// TODO: get public stocklists ids
+// get public stocklists ids
 router.get('/public', async (req, res) => {
     const uid = req.session.uid;
     const stock_lists = await pool.query(
@@ -44,7 +44,7 @@ router.get('/public', async (req, res) => {
 });
 
 // get stock list by slid and include stocks in it
-// TODO: public can be viewed by anyone 
+//       public can be viewed by anyone 
 //       private can only be viewed by the owner and friends invited to review it
 router.get('/:slid', async (req, res) => {
     const uid = req.session.uid;

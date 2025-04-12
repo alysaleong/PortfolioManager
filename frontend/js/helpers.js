@@ -5,7 +5,7 @@ export async function sendRequest(endpoint, method = 'GET', body = null) {
     const options = {
         method,
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include', // Include cookies in requests
+        credentials: 'include',
     };
     if (body) options.body = JSON.stringify(body);
     const response = await fetch(`${apiBase}${endpoint}`, options);
@@ -43,19 +43,3 @@ export function populateDropdown(dropdown, options, values) {
         dropdown.appendChild(option);
     }
 }
-
-// get friend dropdown 
-// async function populateAddFriendsDropdown() {
-//     const dropdown = document.getElementById('add-friend-dropdown');
-//     dropdown.innerHTML = ''; // Clear existing options
-//     // fetch users from the server
-//     const res = await sendRequest('/users');
-//     const emails = res.map(user => user.email);
-//     const uids = res.map(user => user.uid);
-//     console.log(res);
-//     console.log(emails);
-//     // populate the dropdown with emails and uids
-//     populateDropdown(dropdown, emails, uids);
-// }
-
-//populateAddFriendsDropdown();

@@ -9,7 +9,7 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
     const result = await sendRequest('/register', 'POST', body);
     alert(result.message || result.error);
     if (result.message) {
-        updatePage(true); // Update the page to logged-in state
+        updatePage(true); // update the page to logged-in state
     }
 });
 

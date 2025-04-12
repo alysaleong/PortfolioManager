@@ -30,27 +30,27 @@ export async function loadFriends() {
         });
     });
 
-    // Populate dropdowns for inviting friends to review stock lists
+    // populate dropdowns for inviting friends to review stock lists
     await populateInviteDropdowns();
     inviteFriendContainer.style.display = 'block';
 }
 
-// Populate stock list and friend dropdowns
+// populate stock list and friend dropdowns
 async function populateInviteDropdowns() {
     const stocklistDropdown = document.getElementById('stocklist-dropdown');
     const friendDropdown = document.getElementById('friend-dropdown');
 
-    // Clear existing options
+    // clear existing options
     stocklistDropdown.innerHTML = '<option value="" disabled selected>Select Stock List</option>';
     friendDropdown.innerHTML = '<option value="" disabled selected>Select Friend</option>';
 
-    // Fetch stock lists
+    // fetch stock lists
     const stocklists = await sendRequest('/stocklists');
     const stocklistOptions = stocklists.map(stocklist => stocklist.slname);
     const stocklistValues = stocklists.map(stocklist => stocklist.slid);
     populateDropdown(stocklistDropdown, stocklistOptions, stocklistValues);
 
-    // Fetch friends
+    // fetch friends
     const friends = await sendRequest('/friends');
     const friendOptions = friends.map(friend => friend.email);
     const friendValues = friends.map(friend => friend.uid);
@@ -72,7 +72,7 @@ document.getElementById('add-friend-form').addEventListener('submit', async (e) 
     await loadFriends(); // reload friends list after adding
 });
 
-// Handle inviting a friend to review a stock list
+// handle inviting a friend to review a stock list
 document.getElementById('invite-friend-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);

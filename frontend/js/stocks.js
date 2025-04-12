@@ -1,9 +1,9 @@
 import { sendRequest } from './helpers.js';
 
 let selectedStockSymbol = null;
-let stockChart = null; // Store the Chart.js instance
+let stockChart = null; 
 
-// Add or update a stock
+// add or update a stock
 document.getElementById('add-stock-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
@@ -12,7 +12,7 @@ document.getElementById('add-stock-form').addEventListener('submit', async (e) =
     alert(result.message || result.error);
 });
 
-// Add historical stock data
+// add historical stock data
 document.getElementById('add-historical-stock-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
@@ -21,27 +21,27 @@ document.getElementById('add-historical-stock-form').addEventListener('submit', 
     alert(result.message || result.error);
 });
 
-// View stock performance
+// view stock performance
 document.getElementById('view-stock-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const symbol = formData.get('symbol');
     const startDate = new Date(formData.get('start-date')).toISOString(); // Convert to UTC
     const endDate = new Date(formData.get('end-date'));
-    endDate.setDate(endDate.getDate() + 1); // Add one day to include the end date
-    const endDateUTC = endDate.toISOString(); // Convert to UTC
+    endDate.setDate(endDate.getDate() + 1); // add one day to include the end date
+    const endDateUTC = endDate.toISOString(); // convert to UTC
 
     try {
         selectedStockSymbol = symbol;
         const stockDetails = await sendRequest(`/stocks/symbol/${symbol}`, 'POST', { timestamp: startDate });
 
-        // Filter details within the specified date range
+        // filter details within the specified date range
         const filteredDetails = stockDetails.filter(data => {
             const date = new Date(data.timestamp).toISOString();
             return date >= startDate && date < endDateUTC;
         });
 
-        // Sort details by date
+        // sort details by date
         const sortedDetails = filteredDetails.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
         if (sortedDetails.length === 0) {
@@ -57,7 +57,7 @@ document.getElementById('view-stock-form').addEventListener('submit', async (e) 
     }
 });
 
-// Predict stock price
+// predict stock price
 document.getElementById('predict-stock-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
@@ -82,7 +82,7 @@ document.getElementById('predict-stock-form').addEventListener('submit', async (
     }
 });
 
-// Display stock details in a table
+// display stock details in a table
 function displayStockDetails(details) {
     const stockDetailsContainer = document.getElementById('stock-details-container');
     const stockDetailsDiv = document.getElementById('stock-details');
@@ -109,7 +109,7 @@ function displayStockDetails(details) {
     stockDetailsContainer.style.display = 'block';
 }
 
-// Display predicted stock details in a table
+// display predicted stock details in a table
 function displayPredictionDetails(details) {
     const stockDetailsContainer = document.getElementById('stock-details-container');
     const stockDetailsDiv = document.getElementById('stock-details');
@@ -136,19 +136,19 @@ function displayPredictionDetails(details) {
     stockDetailsContainer.style.display = 'block';
 }
 
-// Plot stock performance using Chart.js
+// plot stock performance using Chart.js
 function plotStockPerformance(details) {
     const canvas = document.getElementById('stock-performance-chart');
     const ctx = canvas.getContext('2d');
     const labels = details.map(data => data.timestamp.split('T')[0]);
     const prices = details.map(data => parseFloat(data.price));
 
-    // Destroy the existing chart instance if it exists
+    // destroy the existing chart instance if it exists
     if (stockChart) {
         stockChart.destroy();
     }
 
-    // Create a new Chart.js instance
+    // create a new Chart.js instance
     stockChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -177,19 +177,19 @@ function plotStockPerformance(details) {
     });
 }
 
-// Plot predicted stock performance using Chart.js
+// plot predicted stock performance using Chart.js
 function plotPredictionPerformance(details, symbol) {
     const canvas = document.getElementById('stock-performance-chart');
     const ctx = canvas.getContext('2d');
     const labels = details.map(data => data.timestamp.split('T')[0]);
     const prices = details.map(data => parseFloat(data.price));
 
-    // Destroy the existing chart instance if it exists
+    // destroy the existing chart instance if it exists
     if (stockChart) {
         stockChart.destroy();
     }
 
-    // Create a new Chart.js instance
+    // create a new Chart.js instance
     stockChart = new Chart(ctx, {
         type: 'line',
         data: {

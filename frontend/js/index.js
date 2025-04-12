@@ -56,7 +56,7 @@ function setupNavigation() {
     });
 }
 
-// Call updatePage and setupNavigation on page load
+// call updatePage and setupNavigation on page load
 document.addEventListener('DOMContentLoaded', () => {
     updatePage();
     setupNavigation(); 

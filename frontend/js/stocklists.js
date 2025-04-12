@@ -20,17 +20,17 @@ export async function loadStockLists() {
         stockListsContainer.appendChild(stockListEl);
     });
 
-    // Add event listeners to delete stock list buttons
+    // add event listeners to delete stock list buttons
     const deleteButtons = document.querySelectorAll('.delete-stocklist-button');
     deleteButtons.forEach(button => {
         button.addEventListener('click', async (e) => {
-            e.stopPropagation(); // Prevent triggering the stock list selection
+            e.stopPropagation(); // prevent triggering the stock list selection
             const slid = e.target.dataset.slid;
             const confirmDelete = confirm(`Are you sure you want to delete stock list ${slid}?`);
             if (confirmDelete) {
                 const result = await sendRequest(`/stocklists/${slid}`, 'DELETE');
                 alert(result.message || result.error);
-                await loadStockLists(); // Reload stock lists after deletion
+                await loadStockLists(); // reload stock lists after deletion
             }
         });
     });
@@ -128,9 +128,9 @@ async function selectStockList(slid) {
         await displayStockListStats(stocks, stockListStatsContainer, startDate, endDate);
     });
 
-    // Load and display reviews for the stock list
+    // load and display reviews for the stock list
     await loadStockListReviews(slid);
-    stockListReviewsContainer.style.display = 'block'; // Ensure the reviews container is visible
+    stockListReviewsContainer.style.display = 'block'; 
 }
 
 // display stock list statistics
@@ -184,7 +184,7 @@ async function displayStockListStats(stocks, container, startDate, endDate) {
     }
 }
 
-// Load reviews for the selected stock list
+// load reviews for the selected stock list
 async function loadStockListReviews(slid) {
     const reviewsContainer = document.getElementById('stocklist-reviews');
     reviewsContainer.innerHTML = '<h4>Loading reviews...</h4>';
@@ -210,7 +210,7 @@ async function loadStockListReviews(slid) {
 
         reviewsContainer.innerHTML = reviewsHTML;
 
-        // Add event listeners for delete buttons
+        // add event listeners for delete buttons
         const deleteButtons = document.querySelectorAll('.delete-review-button');
         deleteButtons.forEach(button => {
             button.addEventListener('click', async (e) => {
@@ -219,7 +219,7 @@ async function loadStockListReviews(slid) {
                 if (confirmDelete) {
                     const result = await sendRequest(`/reviews/${slid}`, 'DELETE', { reviewer: uid });
                     alert(result.message || result.error);
-                    await loadStockListReviews(slid); // Reload reviews after deletion
+                    await loadStockListReviews(slid); 
                 }
             });
         });
@@ -240,7 +240,7 @@ document.getElementById('stocklist-add-stock-form').addEventListener('submit', a
     const body = Object.fromEntries(formData.entries());
     const result = await sendRequest(`/stocklists/${selectedStockListId}/stocks`, 'POST', body);
     alert(result.message || result.error);
-    await selectStockList(selectedStockListId); // Reload selected stock list
+    await selectStockList(selectedStockListId); 
 });
 
 // add a new stock list

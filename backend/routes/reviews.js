@@ -5,10 +5,6 @@ import { is_stocklist_owned_by, is_stocklist_public } from "../services/stocklis
 import { is_friend, can_review } from "../services/friendsServices.js";
 const router = express.Router();
 
-// TODO: maybe create assertion for reviews can only be done by friends on 
-//  private lists
-
-
 // get reviews for this stocklist
 //  - for public stock list, reviews can be read by anyone
 //  - for private, can only be viewed by stocklist owner
@@ -33,7 +29,7 @@ router.get('/:slid', async (req, res) => {
 
 });
 
-// TODO: get reviewer's review for this stocklist (untested)
+// get reviewer's review for this stocklist
 //  - for public stock list, reviews can be read by anyone
 //  - for private, can only be viewed by stocklist owner or reviewer
 router.get('/:slid/users/:reviewer', async (req, res) => {
@@ -187,7 +183,7 @@ router.patch('/:slid', async (req, res) => {
 
 });
 
-// TODO: delete review (untested)
+// delete review
 //  - can be deleted by owner of stocklist or reviewer
 router.delete('/:slid', async (req, res) => {
     const uid = req.session.uid; 

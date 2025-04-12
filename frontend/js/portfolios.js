@@ -2,10 +2,10 @@ import { sendRequest } from './helpers.js';
 
 let selectedPortfolioId = null;
 
-// Load all portfolios
+// load all portfolios
 export async function loadPortfolios() {
     const portfoliosContainer = document.getElementById('portfolios-container');
-    portfoliosContainer.innerHTML = '<h3>Your Portfolios</h3>'; // Clear the list before populating
+    portfoliosContainer.innerHTML = '<h3>Your Portfolios</h3>'; // clear the list before populating
     const portfolios = await sendRequest('/portfolios');
     portfolios.forEach(portfolio => {
         const portfolioEl = document.createElement('div');
@@ -17,22 +17,22 @@ export async function loadPortfolios() {
         portfoliosContainer.appendChild(portfolioEl);
     });
 
-    // Add event listeners to portfolio items
+    // add event listeners to portfolio items
     const portfolioItems = document.querySelectorAll('.portfolio-item');
     portfolioItems.forEach(item => {
         item.addEventListener('click', async () => {
             const pid = item.getAttribute('data-pid');
-            await selectPortfolio(pid); // Load the selected portfolio's details
+            await selectPortfolio(pid); // load the selected portfolio's details
         });
     });
 
-    // Automatically select the first portfolio if none is selected
+    // automatically select the first portfolio if none is selected
     if (!selectedPortfolioId && portfolios.length > 0) {
         await selectPortfolio(portfolios[0].pid);
     }
 }
 
-// Select a portfolio and load its details
+// select a portfolio and load its details
 async function selectPortfolio(pid) {
     selectedPortfolioId = pid;
     const portfolioDetails = await sendRequest(`/portfolios/${pid}`);
@@ -43,7 +43,7 @@ async function selectPortfolio(pid) {
     const portfolioActionsContainer = document.getElementById('portfolio-actions-container');
     const portfolioHistoryContainer = document.getElementById('portfolio-history-container');
 
-    // Ensure all relevant sections are visible
+    // ensure all relevant sections are visible
     portfolioDetailsContainer.style.display = 'block';
     portfolioStocksContainer.style.display = 'block';
     portfolioStatsContainer.style.display = 'block';
@@ -51,11 +51,11 @@ async function selectPortfolio(pid) {
     portfolioActionsContainer.style.display = 'block';
     portfolioHistoryContainer.style.display = 'block';
 
-    // Extract "Portfolio Total" data and filter it out from the stocks list
+    // extract "Portfolio Total" data and filter it out from the stocks list
     const portfolioTotal = portfolioDetails.stocks.find(stock => stock.symbol === "Portfolio Total");
     const stocks = portfolioDetails.stocks.filter(stock => stock.symbol !== "Portfolio Total");
 
-    // Display portfolio details
+    // display portfolio details
     portfolioDetailsContainer.innerHTML = `
         <h3>${portfolioDetails.pname}</h3>
         <div id="portfolio-cash">Cash: $${portfolioDetails.cash}</div>
@@ -63,7 +63,7 @@ async function selectPortfolio(pid) {
         <div>Total Value: $${portfolioTotal.total_value || 0}</div>
     `;
 
-    // Display stocks in the portfolio
+    // display stocks in the portfolio
     portfolioStocksContainer.innerHTML = `<h3>Stocks in ${portfolioDetails.pname}</h3>`;
     stocks.forEach(stock => {
         const stockEl = document.createElement('div');
@@ -78,7 +78,7 @@ async function selectPortfolio(pid) {
         portfolioStocksContainer.appendChild(stockEl);
     });
 
-    // Display portfolio stats
+    // display portfolio stats
     portfolioStatsContainer.innerHTML = `
         <h3>Portfolio Statistics</h3>
         <form id="portfolio-stats-form">
@@ -91,7 +91,7 @@ async function selectPortfolio(pid) {
         <div id="portfolio-stats-results"></div>
     `;
 
-    // Add event listener for the portfolio stats form
+    // add event listener for the portfolio stats form
     document.getElementById('portfolio-stats-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const startDate = document.getElementById('start-date2').value;
@@ -108,7 +108,7 @@ async function selectPortfolio(pid) {
         await displayPortfolioStats(stocks, portfolioStatsContainer, startDate, endDate);
     });
 
-    // Show the add stock form
+    // show the add stock form
     addStockForm.innerHTML = `
         <h4>Manage Stocks in ${portfolioDetails.pname}</h4>
         <input type="text" name="symbol" placeholder="Stock Symbol" required>
@@ -117,7 +117,7 @@ async function selectPortfolio(pid) {
         <button type="button" id="sell-stock-button">Sell Stock</button>
     `;
 
-    // Add event listener for the "Sell Stock" button
+    // add event listener for the "Sell Stock" button
     document.getElementById('sell-stock-button').addEventListener('click', async () => {
         const formData = new FormData(addStockForm);
         const body = Object.fromEntries(formData.entries());
@@ -127,7 +127,7 @@ async function selectPortfolio(pid) {
         await selectPortfolio(selectedPortfolioId); // Reload selected portfolio
     });
 
-    // Show deposit, withdraw, and transfer forms
+    // show deposit, withdraw, and transfer forms
     portfolioActionsContainer.style.display = 'block';
     portfolioActionsContainer.innerHTML = `
         <form id="deposit-form">
@@ -150,7 +150,7 @@ async function selectPortfolio(pid) {
         </form>
     `;
 
-    // Populate transfer portfolio dropdown
+    // populate transfer portfolio dropdown
     const transferDropdown = document.getElementById('transfer-to-portfolio');
     const portfolios = await sendRequest('/portfolios');
     portfolios.forEach(portfolio => {
@@ -162,7 +162,7 @@ async function selectPortfolio(pid) {
         }
     });
 
-    // Add event listeners for deposit, withdraw, and transfer forms
+    // add event listeners for deposit, withdraw, and transfer forms
     document.getElementById('deposit-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
@@ -170,7 +170,7 @@ async function selectPortfolio(pid) {
         body.pid = selectedPortfolioId;
         const result = await sendRequest('/portfolios/deposit', 'POST', body);
         alert(result.message || result.error);
-        await updateCashDisplay(); // Update cash display
+        await updateCashDisplay(); 
     });
 
     document.getElementById('withdraw-form').addEventListener('submit', async (e) => {
@@ -180,7 +180,7 @@ async function selectPortfolio(pid) {
         body.pid = selectedPortfolioId;
         const result = await sendRequest('/portfolios/withdraw', 'POST', body);
         alert(result.message || result.error);
-        await updateCashDisplay(); // Update cash display
+        await updateCashDisplay(); 
     });
 
     document.getElementById('transfer-form').addEventListener('submit', async (e) => {
@@ -190,14 +190,14 @@ async function selectPortfolio(pid) {
         body.from = selectedPortfolioId;
         const result = await sendRequest('/portfolios/transfer', 'POST', body);
         alert(result.message || result.error);
-        await updateCashDisplay(); // Update cash display
+        await updateCashDisplay(); 
     });
 
-    // Load and display bought history by default
+    // load and display bought history by default
     await loadPortfolioHistory(pid, 'bought');
 }
 
-// Load portfolio transaction history
+// load portfolio transaction history
 async function loadPortfolioHistory(pid, type = 'bought') {
     const portfolioHistoryContainer = document.getElementById('portfolio-history');
     portfolioHistoryContainer.innerHTML = '<h4>Loading transaction history...</h4>';
@@ -238,7 +238,7 @@ async function loadPortfolioHistory(pid, type = 'bought') {
     }
 }
 
-// Add event listeners for history buttons
+// add event listeners for history buttons
 document.getElementById('bought-history-button').addEventListener('click', async () => {
     if (selectedPortfolioId) {
         await loadPortfolioHistory(selectedPortfolioId, 'bought');
@@ -251,7 +251,7 @@ document.getElementById('sold-history-button').addEventListener('click', async (
     }
 });
 
-// Display portfolio statistics
+// display portfolio statistics
 async function displayPortfolioStats(stocks, container, startDate, endDate) {
     try {
         const covPromises = stocks.map(stock => sendRequest(`/stocks/symbol/${stock.symbol}/cov`, 'POST', {
@@ -302,7 +302,7 @@ async function displayPortfolioStats(stocks, container, startDate, endDate) {
     }
 }
 
-// Update the displayed cash value
+// update the displayed cash value
 async function updateCashDisplay() {
     try {
         const response = await sendRequest(`/portfolios/${selectedPortfolioId}/cash`);
@@ -315,7 +315,7 @@ async function updateCashDisplay() {
     }
 }
 
-// Add a stock to the selected portfolio
+// add a stock to the selected portfolio
 document.getElementById('add-stock-to-portfolio-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!selectedPortfolioId) {
@@ -330,7 +330,7 @@ document.getElementById('add-stock-to-portfolio-form').addEventListener('submit'
     await selectPortfolio(selectedPortfolioId); // Reload selected portfolio
 });
 
-// Add a new portfolio
+// add a new portfolio
 document.getElementById('add-portfolio-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
@@ -351,7 +351,7 @@ document.getElementById('add-portfolio-form').addEventListener('submit', async (
     }
 });
 
-// Load portfolios on page load
+// load portfolios on page load
 document.getElementById('portfolio-tab').addEventListener('click', async () => {
     await loadPortfolios();
 });

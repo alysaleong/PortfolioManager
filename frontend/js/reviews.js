@@ -2,13 +2,13 @@ import { sendRequest } from './helpers.js';
 
 let selectedStockListId = null;
 
-// Load public stock lists
+// load public stock lists
 async function loadPublicLists() {
     const targetSection = document.getElementById("review-content");
     targetSection.style.display = 'block';
 
     const publicListsContainer = document.getElementById('public-lists-container');
-    publicListsContainer.innerHTML = '<h3>Public Stock Lists</h3>'; // Clear the container
+    publicListsContainer.innerHTML = '<h3>Public Stock Lists</h3>'; 
     const publicLists = await sendRequest('/stocklists/public');
     publicLists.forEach(list => {
         if (list.public) {
@@ -23,28 +23,28 @@ async function loadPublicLists() {
         }
     });
 
-    // Add event listeners for "View Reviews" buttons
+    // add event listeners for "View Reviews" buttons
     const viewReviewsButtons = document.querySelectorAll('.view-reviews-button');
     viewReviewsButtons.forEach(button => {
         button.addEventListener('click', async (e) => {
             e.preventDefault();
             const slid = e.target.dataset.slid;
-            await loadStockListDetails(slid, true); // Load stocks and reviews for the selected stock list
+            await loadStockListDetails(slid, true); // load stocks and reviews for the selected stock list
         });
     });
 
-    // Add event listeners for "Write Review" buttons
+    // add event listeners for "Write Review" buttons
     const writeReviewButtons = document.querySelectorAll('.write-review-button');
     writeReviewButtons.forEach(button => {
         button.addEventListener('click', async (e) => {
-            e.preventDefault(); // Prevent default behavior
+            e.preventDefault(); 
             selectedStockListId = e.target.dataset.slid;
-            await loadStockListDetails(selectedStockListId, false); // Load stocks and show the review form
+            await loadStockListDetails(selectedStockListId, false); 
         });
     });
 }
 
-// Load lists being reviewed
+// load lists being reviewed
 async function loadReviewingLists() {
     const targetSection = document.getElementById("review-content");
     targetSection.style.display = 'block'; 
@@ -65,7 +65,7 @@ async function loadReviewingLists() {
         reviewingListsContainer.appendChild(listEl);
     }
 
-    // Add event listeners for "Write Review" buttons
+    // add event listeners for "Write Review" buttons
     const writeReviewButtons = document.querySelectorAll('.write-review-button');
     writeReviewButtons.forEach(button => {
         button.addEventListener('click', async (e) => {
@@ -75,7 +75,7 @@ async function loadReviewingLists() {
         });
     });
 
-    // Add event listeners for "Delete Review" buttons
+    // add event listeners for "Delete Review" buttons
     const deleteReviewButtons = document.querySelectorAll('.delete-review-button');
     deleteReviewButtons.forEach(button => {
         button.addEventListener('click', async (e) => {
@@ -91,7 +91,7 @@ async function loadReviewingLists() {
     });
 }
 
-// Load stock list details for viewing, including stocks, reviews, and stats
+// load stock list details for viewing, including stocks, reviews, and stats
 async function loadStockListDetails(slid, isViewMode) {
     const stockListDetails = await sendRequest(`/stocklists/${slid}`);
     const stockListDetailsContainer = document.getElementById('review-stocks-container');
@@ -99,7 +99,7 @@ async function loadStockListDetails(slid, isViewMode) {
     const writeReviewForm = document.getElementById('write-review-form');
     const stockListStatsContainer = document.getElementById('review-stocklist-stats-container');
 
-    // Display stocks in the stock list
+    // display stocks in the stock list
     stockListDetailsContainer.innerHTML = `
         <h3>Stocks in ${stockListDetails.slname}</h3>
     `;
@@ -116,7 +116,7 @@ async function loadStockListDetails(slid, isViewMode) {
     stockListDetailsContainer.style.display = 'block';
 
     if (isViewMode) {
-        // Load and display reviews for the stock list
+        // load and display reviews for the stock list
         try {
             const reviews = await sendRequest(`/reviews/${slid}`);
             if (reviews.length === 0) {
@@ -139,15 +139,15 @@ async function loadStockListDetails(slid, isViewMode) {
             stockListReviewsContainer.innerHTML = '<div>Error loading reviews.</div>';
         }
         stockListReviewsContainer.style.display = 'block';
-        writeReviewForm.style.display = 'none'; // Hide the review form
+        writeReviewForm.style.display = 'none'; // hide the review form
     } else {
-        // Show the review form for writing/editing a review
+        // show the review form for writing/editing a review
         writeReviewForm.style.display = 'block';
-        stockListReviewsContainer.style.display = 'none'; // Hide the reviews section
-        await prefillReviewForm(slid); // Pre-fill the form with the existing review
+        stockListReviewsContainer.style.display = 'none'; // hide the reviews section
+        await prefillReviewForm(slid); // pre-fill the form with the existing review
     }
 
-    // Display stock list statistics
+    // display stock list statistics
     stockListStatsContainer.style.display = 'block';
     stockListStatsContainer.innerHTML = `
         <h3>Stock List Statistics</h3>
@@ -161,7 +161,7 @@ async function loadStockListDetails(slid, isViewMode) {
         <div id="review-stocklist-stats-results"></div>
     `;
 
-    // Add event listener for the stock list stats form
+    // add event listener for the stock list stats form
     document.getElementById('review-stocklist-stats-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const startDate = document.getElementById('start-date4').value;
@@ -173,7 +173,7 @@ async function loadStockListDetails(slid, isViewMode) {
     });
 }
 
-// Display stock list statistics
+// display stock list statistics
 async function displayStockListStats(stocks, container, startDate, endDate, slid) {
     try {
         const covPromises = stocks.map(stock => sendRequest(`/stocks/symbol/${stock.symbol}/cov`, 'POST', {
@@ -224,14 +224,14 @@ async function displayStockListStats(stocks, container, startDate, endDate, slid
     }
 }
 
-// Pre-fill the review form with the existing review if available
+// pre-fill the review form with the existing review if available
 async function prefillReviewForm(slid) {
     try {
-        // Fetch the user's UID from the /me endpoint
+        // fetch the user's UID from the /me endpoint
         const user = await sendRequest('/me');
         const uid = user.uid;
 
-        // Fetch the existing review using the UID
+        // fetch the existing review using the UID
         const existingReview = await sendRequest(`/reviews/${slid}/users/${uid}`, 'GET');
         if (existingReview && existingReview.review !== undefined) {
             const reviewForm = document.getElementById('write-review-form');
@@ -242,44 +242,45 @@ async function prefillReviewForm(slid) {
     }
 }
 
-// Handle toggles for public and reviewing lists
+// handle toggles for public and reviewing lists
 document.getElementById('toggle-public-lists').addEventListener('click', async (e) => {
-    e.preventDefault(); // Prevent default behavior
+    e.preventDefault(); 
     const publicListsContainer = document.getElementById('public-lists-container');
     const reviewingListsContainer = document.getElementById('reviewing-lists-container');
     const reviewStocksContainer = document.getElementById('review-stocks-container'); // Stocks container
     const writeReviewForm = document.getElementById('write-review-form');
 
-    reviewingListsContainer.style.display = 'none'; // Hide the other container
-    reviewStocksContainer.style.display = 'none'; // Hide the stocks list
-    writeReviewForm.style.display = 'none'; // Hide the review form
+    // hide the other containers
+    reviewingListsContainer.style.display = 'none'; 
+    reviewStocksContainer.style.display = 'none'; 
+    writeReviewForm.style.display = 'none'; 
 
-    await loadPublicLists(); // Load content first
-    publicListsContainer.style.display = 'block'; // Then display the container
+    await loadPublicLists(); 
+    publicListsContainer.style.display = 'block'; 
     const targetSection = document.getElementById("review-content");
     targetSection.style.display = 'block';
 });
 
 document.getElementById('toggle-reviewing-lists').addEventListener('click', async (e) => {
-    e.preventDefault(); // Prevent default behavior
+    e.preventDefault(); 
     const reviewingListsContainer = document.getElementById('reviewing-lists-container');
     const publicListsContainer = document.getElementById('public-lists-container');
     const reviewStocksContainer = document.getElementById('review-stocks-container'); // Stocks container
     const writeReviewForm = document.getElementById('write-review-form');
 
-    publicListsContainer.style.display = 'none'; // Hide the other container
-    reviewStocksContainer.style.display = 'none'; // Hide the stocks list
-    writeReviewForm.style.display = 'none'; // Hide the review form
+    publicListsContainer.style.display = 'none'; 
+    reviewStocksContainer.style.display = 'none'; 
+    writeReviewForm.style.display = 'none'; 
 
-    await loadReviewingLists(); // Load content first
-    reviewingListsContainer.style.display = 'block'; // Then display the container
+    await loadReviewingLists(); 
+    reviewingListsContainer.style.display = 'block'; 
     const targetSection = document.getElementById("review-content");
     targetSection.style.display = 'block';
 });
 
-// Handle review submission
+// handle review submission
 document.getElementById('write-review-form').addEventListener('submit', async (e) => {
-    e.preventDefault(); // Prevent default behavior
+    e.preventDefault(); 
     if (!selectedStockListId) {
         alert('Please select a stock list first.');
         return;
@@ -288,26 +289,26 @@ document.getElementById('write-review-form').addEventListener('submit', async (e
     const body = Object.fromEntries(formData.entries());
 
     try {
-        // Try to fetch the existing review
-        // Fetch the user's UID from the /me endpoint
+        // try to fetch the existing review
+        // fetch the user's UID from the /me endpoint
         const user = await sendRequest('/me');
         const uid = user.uid;
 
 
         const existingReview = await sendRequest(`/reviews/${selectedStockListId}/users/${uid}`, 'GET');
         if (existingReview && existingReview.review != undefined) {
-            // If a review exists, send a PATCH request to update it
+            // if a review exists, send a PATCH request to update it
             const result = await sendRequest(`/reviews/${selectedStockListId}`, 'PATCH', body);
             alert(result.message || result.error);
         }
         else 
         {
-            // If no review exists, send a POST request to create it
+            // if no review exists, send a POST request to create it
             const result = await sendRequest(`/reviews/${selectedStockListId}`, 'POST', body);
             alert(result.message || result.error);
         }
     } catch (error) {
-        // If no review exists, send a POST request to create it
+        // if no review exists, send a POST request to create it
         const result = await sendRequest(`/reviews/${selectedStockListId}`, 'POST', body);
         alert(result.message || result.error);
     }

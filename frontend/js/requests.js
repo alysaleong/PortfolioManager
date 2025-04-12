@@ -28,7 +28,7 @@ export async function loadIncomingRequest() {
             console.log(`Accepting request from UID: ${uid}`);
             const result = await sendRequest('/friends/requests/accept', 'POST', { requester: uid });
             alert(result.message || result.error);
-            await loadIncomingRequest(); // reload incoming requests list after accepting
+            await loadIncomingRequest(); 
         });
     });
 
@@ -39,7 +39,7 @@ export async function loadIncomingRequest() {
             console.log(`Rejecting request from UID: ${uid}`);
             const result = await sendRequest('/friends/requests/reject', 'POST', { requester: uid });
             alert(result.message || result.error);
-            await loadIncomingRequest(); // reload incoming requests list after rejecting
+            await loadIncomingRequest(); 
         });
     });
 }

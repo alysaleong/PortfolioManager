@@ -123,7 +123,7 @@ nav {
 /* Friend Request Item Styling */
 .request-item {
     display: flex;
-    justify-content: space-between; /* Space between email and buttons */
+    justify-content: space-between; 
     align-items: center;
     padding: 0.5rem 1rem;
     margin-bottom: 0.5rem;
@@ -133,14 +133,14 @@ nav {
 }
 
 .request-email {
-    flex: 1; /* Take up remaining space on the left */
+    flex: 1; 
     font-size: 1rem;
     color: #333;
 }
 
 .request-buttons {
     display: flex;
-    gap: 0.5rem; /* Add spacing between the buttons */
+    gap: 0.5rem; 
 }
 
 button.remove-friend-button, button.remove-stock-button {
@@ -161,7 +161,7 @@ button.delete-stocklist-button:hover,
 button.delete-review-button:hover,
 button.remove-friend-button:hover,
 button.remove-stock-button:hover {
-    background-color: #e53935; /* Red color on hover */
+    background-color: #e53935; 
 }
 
 /* Stock List Details */
@@ -220,15 +220,15 @@ button.remove-stock-button:hover {
 .stocklist-public {
     font-size: 0.9rem;
     color: #666;
-    margin-right: 1rem; /* Add space to the right of the public/private text */
+    margin-right: 1rem; 
 }
 
 /* Checkbox Styling */
 .checkbox-container {
     display: flex;
-    justify-content: center; /* Center the checkbox and label horizontally */
-    align-items: center; /* Align the checkbox and label vertically */
-    gap: 0.5rem; /* Add spacing between the checkbox and the label */
+    justify-content: center; 
+    align-items: center; 
+    gap: 0.5rem; 
     margin-top: 0.5rem;
 }
 
@@ -242,15 +242,15 @@ button.remove-stock-button:hover {
     font-size: 1rem;
     color: #333;
     cursor: pointer;
-    margin: 0; /* Ensure no extra margin is added */
-    text-align: center; /* Center the text within the label */
+    margin: 0; 
+    text-align: center; 
 }
 
 /* Inline Checkbox and Label Styling */
 .inline-checkbox-container {
     display: flex;
-    align-items: center; /* Align the checkbox and label vertically */
-    gap: 0.5rem; /* Add spacing between the checkbox and the label */
+    align-items: center; 
+    gap: 0.5rem; 
     margin-top: 0.5rem;
 }
 
@@ -264,19 +264,19 @@ button.remove-stock-button:hover {
     font-size: 1rem;
     color: #333;
     cursor: pointer;
-    margin: 0; /* Ensure no extra margin is added */
+    margin: 0; 
 }
 
 /* Accept and Reject Buttons */
 .accept-request-button {
-    background-color: #31b4b2; /* Green for accept */
+    background-color: #31b4b2; 
     color: white;
     border: none;
     padding: 0.3rem 0.5rem;
     border-radius: 4px;
     cursor: pointer;
     font-size: 0.9rem;
-    margin-right: 0.5rem; /* Add spacing between buttons */
+    margin-right: 0.5rem; 
 }
 
 .accept-request-button:hover {
@@ -284,7 +284,7 @@ button.remove-stock-button:hover {
 }
 
 .reject-request-button {
-    background-color: #31b4b2; /* Red for reject */
+    background-color: #31b4b2; 
     color: white;
     border: none;
     padding: 0.3rem 0.5rem;
@@ -341,8 +341,8 @@ button.remove-stock-button:hover {
 #portfolio-list-cash {
     font-size: 0.9rem;
     color: #666;
-    text-align: right; /* Right-align the cash value */
-    flex-shrink: 0; /* Prevent shrinking of the cash value */
+    text-align: right; 
+    flex-shrink: 0; 
 }
 
 /* General Button Styles */
