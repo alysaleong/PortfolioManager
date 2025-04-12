@@ -197,7 +197,7 @@ router.delete('/:slid', async (req, res) => {
     // if user isnt the owner or reviewer, return error
     if (uid != reviewer) {
         // check if this user is the owner of the stocklist
-        if (!await is_stocklist_owned_by(slid, uid)) {
+        if (!await can_review(uid, slid)) {
             return res.status(400).json({ error: "Invalid stock list id or you are not the owner of this stock list" });
         }
     }

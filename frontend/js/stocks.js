@@ -67,7 +67,6 @@ document.getElementById('predict-stock-form').addEventListener('submit', async (
 
     try {
         const result = await sendRequest(`/stocks/symbol/${symbol}/future`, 'POST', { timestamp });
-        alert(JSON.stringify(result));
         const sortedDetails = result.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
         if (sortedDetails.length === 0) {

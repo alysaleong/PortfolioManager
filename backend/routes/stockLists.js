@@ -295,7 +295,7 @@ router.post('/cov', async (req, res) => {
     const end_date = req.body.end_date;
 
     // check if the slid belongs to this user
-    if (!await is_stocklist_owned_by(slid, uid)) {
+    if (!await can_review(uid, slid)) {
         return res.status(400).json({ error: "Invalid stock list id or you are not the owner of this stock list" });
     }
 

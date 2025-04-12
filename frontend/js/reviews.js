@@ -15,7 +15,7 @@ async function loadPublicLists() {
             const listEl = document.createElement('div');
             listEl.classList.add('stocklist-item');
             listEl.innerHTML = `
-                <div class="stocklist-name">${list.slname}</div>
+                <div class="stocklist-name">${list.slid}: ${list.slname}</div>
                 <button class="view-reviews-button" data-slid="${list.slid}">View Reviews</button>
                 <button class="write-review-button" data-slid="${list.slid}">Write Review</button>
             `;
@@ -58,7 +58,7 @@ async function loadReviewingLists() {
         const listEl = document.createElement('div');
         listEl.classList.add('stocklist-item');
         listEl.innerHTML = `
-            <div class="stocklist-name">${list.slname} (Owner: ${ownerEmail.email})</div>
+            <div class="stocklist-name">${list.slid}: ${list.slname} (Owner: ${ownerEmail.email})</div>
             <button class="write-review-button" data-slid="${list.slid}">Write Review</button>
             <button class="delete-review-button" data-slid="${list.slid}">Delete Review</button>
         `;
@@ -91,12 +91,13 @@ async function loadReviewingLists() {
     });
 }
 
-// Load stock list details for viewing, including stocks and reviews
+// Load stock list details for viewing, including stocks, reviews, and stats
 async function loadStockListDetails(slid, isViewMode) {
     const stockListDetails = await sendRequest(`/stocklists/${slid}`);
     const stockListDetailsContainer = document.getElementById('review-stocks-container');
     const stockListReviewsContainer = document.getElementById('public-stocklist-reviews-container');
     const writeReviewForm = document.getElementById('write-review-form');
+    const stockListStatsContainer = document.getElementById('review-stocklist-stats-container');
 
     // Display stocks in the stock list
     stockListDetailsContainer.innerHTML = `
@@ -144,6 +145,82 @@ async function loadStockListDetails(slid, isViewMode) {
         writeReviewForm.style.display = 'block';
         stockListReviewsContainer.style.display = 'none'; // Hide the reviews section
         await prefillReviewForm(slid); // Pre-fill the form with the existing review
+    }
+
+    // Display stock list statistics
+    stockListStatsContainer.style.display = 'block';
+    stockListStatsContainer.innerHTML = `
+        <h3>Stock List Statistics</h3>
+        <form id="review-stocklist-stats-form">
+            <label for="start-date">Start Date:</label>
+            <input type="date" id="start-date4" required>
+            <label for="end-date">End Date:</label>
+            <input type="date" id="end-date4" required>
+            <button type="submit">Get Statistics</button>
+        </form>
+        <div id="review-stocklist-stats-results"></div>
+    `;
+
+    // Add event listener for the stock list stats form
+    document.getElementById('review-stocklist-stats-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const startDate = document.getElementById('start-date4').value;
+        const endDate = document.getElementById('end-date4').value;
+
+        const stocks = stockListDetails.stocks;
+        const stockListStatsContainer = document.getElementById('review-stocklist-stats-container');
+        await displayStockListStats(stocks, stockListStatsContainer, startDate, endDate, slid);
+    });
+}
+
+// Display stock list statistics
+async function displayStockListStats(stocks, container, startDate, endDate, slid) {
+    try {
+        const covPromises = stocks.map(stock => sendRequest(`/stocks/symbol/${stock.symbol}/cov`, 'POST', {
+            start_date: startDate,
+            end_date: endDate
+        }));
+        const betaPromises = stocks.map(stock => sendRequest(`/stocks/symbol/${stock.symbol}/beta`, 'POST', {
+            start_date: startDate,
+            end_date: endDate
+        }));
+        const covMatrixPromise = sendRequest('/stocklists/cov', 'POST', {
+            slid: slid,
+            start_date: startDate,
+            end_date: endDate
+        });
+
+        const covResults = await Promise.all(covPromises);
+        const betaResults = await Promise.all(betaPromises);
+        const covMatrix = await covMatrixPromise;
+
+        const resultsContainer = document.getElementById('review-stocklist-stats-results');
+        resultsContainer.innerHTML = `<h4>Coefficient of Variation (COV)</h4>`;
+        stocks.forEach((stock, index) => {
+            resultsContainer.innerHTML += `<div>${stock.symbol}: ${covResults[index][0]?.cov || 'N/A'}</div>`;
+        });
+
+        resultsContainer.innerHTML += `<h4>Beta Coefficient</h4>`;
+        stocks.forEach((stock, index) => {
+            resultsContainer.innerHTML += `<div>${stock.symbol}: ${betaResults[index][0]?.beta || 'N/A'}</div>`;
+        });
+
+        resultsContainer.innerHTML += `<h4>Covariance Matrix</h4>`;
+        if (covMatrix.length > 0) {
+            const symbols = stocks.map(stock => stock.symbol);
+            let matrixHTML = '<table border="1" style="border-collapse: collapse; text-align: center;">';
+            matrixHTML += '<tr><th></th>' + symbols.map(symbol => `<th>${symbol}</th>`).join('') + '</tr>';
+            covMatrix.forEach((row, rowIndex) => {
+                matrixHTML += `<tr><th>${symbols[rowIndex]}</th>` + row.map(cell => `<td>${cell[0]}</td>`).join('') + '</tr>';
+            });
+            matrixHTML += '</table>';
+            resultsContainer.innerHTML += matrixHTML;
+        } else {
+            resultsContainer.innerHTML += `<div>No covariance matrix available</div>`;
+        }
+    } catch (error) {
+        console.error('Error fetching stock list stats:', error);
+        container.innerHTML += `<div>Error fetching stock list stats</div>`;
     }
 }
 

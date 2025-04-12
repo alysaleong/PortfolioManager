@@ -67,11 +67,11 @@ router.post('/', async (req, res) => {
 router.post('/hist', async (req, res) => {
     const symbol = req.body.symbol;
     const timestamp = req.body.timestamp;
-    const open = req.body.open;
-    const high = req.body.high;
-    const low = req.body.low;
-    const close = req.body.close;
-    const volume = req.body.volume;
+    const open = Number(req.body.open);
+    const high = Number(req.body.high);
+    const low = Number(req.body.low);
+    const close = Number(req.body.close);
+    const volume = Number(req.body.volume);
 
     if (!(1 <= symbol.length && symbol.length <= 5)) {
         res.status(400).json({error: "Symbol must be within one to five characters"});

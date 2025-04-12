@@ -13,7 +13,6 @@ export async function loadPortfolios() {
         portfolioEl.setAttribute('data-pid', portfolio.pid);
         portfolioEl.innerHTML = `
             <button class="portfolio-name">${portfolio.pid}: ${portfolio.pname}</button>
-            <div id="portfolio-list-cash">Cash: $${portfolio.cash}</div>
         `;
         portfoliosContainer.appendChild(portfolioEl);
     });
@@ -307,10 +306,6 @@ async function displayPortfolioStats(stocks, container, startDate, endDate) {
 async function updateCashDisplay() {
     try {
         const response = await sendRequest(`/portfolios/${selectedPortfolioId}/cash`);
-        const cashElement = document.getElementById('portfolio-list-cash');
-        if (cashElement && response.cash !== undefined) {
-            cashElement.textContent = `Cash: $${response.cash}`;
-        }
         const otherCashElement = document.getElementById('portfolio-cash');
         if (otherCashElement && response.cash !== undefined) {
             otherCashElement.textContent = `Cash: $${response.cash}`;

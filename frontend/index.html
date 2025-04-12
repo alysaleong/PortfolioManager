@@ -160,6 +160,19 @@
                     <textarea name="review" placeholder="Write your review..." maxlength="4000" required></textarea>
                     <button type="submit">Submit Review</button>
                 </form>
+                <div id="review-stocklist-stats-container" class="sub-content-section" style="display: none;">
+                    <h3>Stock List Statistics</h3>
+                    <form id="review-stocklist-stats-form">
+                        <label for="start-date">Start Date:</label>
+                        <input type="date" id="start-date4" name="start-date" required>
+                        <label for="end-date">End Date:</label>
+                        <input type="date" id="end-date4" name="end-date" required>
+                        <button type="submit">Generate Statistics</button>
+                    </form>
+                    <div id="review-stocklist-stats-results">
+                        <!-- Stock list statistics will be dynamically populated here -->
+                    </div>
+                </div>
             </section>
 
             <section id="portfolio-content" class="content-section" style="display: none;">
